@@ -1,0 +1,148 @@
+{% load static %}
+
+<!DOCTYPE html>
+<!--[if lt IE 9 ]><html class="no-js oldie" lang="en"> <![endif]-->
+<!--[if IE 9 ]><html class="no-js oldie ie9" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+
+  <!--- basic page needs
+    ================================================== -->
+  <meta charset="utf-8">
+  <title>Alanno</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- mobile specific metas
+    ================================================== -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS
+    ================================================== -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/org-tree.css' %}">
+  <link rel="stylesheet" href="{% static 'css/vue-multiselect.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/vue-slider.css' %}">
+  <link rel="stylesheet" href="{% static 'css/select.css' %}">
+
+  <!-- script
+    ================================================== -->
+  <script src="{% static 'js/modernizr.js' %}"></script>
+  <script src="{% static 'js/pace.min.js' %}"></script>
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+  <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+
+  <!-- favicons
+    ================================================== -->
+  <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+</head>
+
+
+<body>
+  <header class="s-header">
+
+    <div class="row">
+      <div class="header-logo">
+        <a class="site-logo" href="{% url 'home' %}">
+          <img src="{% static 'images/logo.svg' %}" alt="Homepage" style="width: 30%; height: auto;">
+        </a>
+      </div>
+      <!-- <div class="header-logo-secondary">
+        <a class="site-logo" href="https://takelab.fer.hr/" alt="TakeLab">
+          <img src="{% static 'images/favicon.ico' %}" style="width: 25px; height: 25px;">
+        </a>
+      </div> -->
+    </div>
+
+    <nav class="header-nav">
+
+      <a href="#0" class="header-nav__close" title="close"><span>Close</span></a>
+
+      <div class="header-nav__content">
+        <h3>{{ user }}</h3>
+
+        <ul class="header-nav__list">
+          <a href="{% url 'home' %}" title="home">
+            <li class="current"><i class="fa fa-home" aria-hidden="true"></i> Home</li>
+          </a>
+          <a href="{% url 'projects' %}" title="projects">
+            <li><i class="fa fa-book" aria-hidden="true"></i> Projects</li>
+          </a>
+          <hr class="bg-green">
+          <a href="{% url 'settings' project_id=project_id %}" title="Settings">
+            <li><i class="fa fa-cogs" aria-hidden="true"></i> Settings</li>
+          </a>
+          <a href="{% url 'label-management' project_id=project_id %}" title="Labels">
+            <li><i class="fa fa-tags" aria-hidden="true"></i> Labels</li>
+          </a>
+          <a href="{% url 'stats' project_id=project_id %}" title="Statistics">
+            <li><i class="fa fa-bar-chart" aria-hidden="true"></i> Stats</li>
+          </a>
+          <a href="{% url 'control' project_id=project_id %}" title="Control">
+            <li><i class="fa fa-gamepad" aria-hidden="true"></i> Control</li>
+          </a>
+          <br>
+          <a href="{% url 'dataset' project_id=project_id %}" title="Data">
+            <li><i class="fa fa-database" aria-hidden="true"></i> Data</li>
+          </a>
+          <a href="{% url 'import' project_id=project_id %}" title="Import">
+            <li><i class="fa fa-upload" aria-hidden="true"></i> Import</li>
+          </a>
+          <a href="{% url 'export' project_id=project_id %}" title="Export">
+            <li><i class="fa fa-download" aria-hidden="true"></i> Export</li>
+          </a>
+          <a href="{% url 'annotation' project_id=project_id %}" title="annotation">
+            <li><i class="fa fa-pencil" aria-hidden="true"></i> Annotation</li>
+          </a>
+          {% if user == main_annotator %}
+            <a href="{% url 'gl_annotation' project_id=project_id %}" title="gl_annotation">
+              <li><i class="fa fa-pencil" aria-hidden="true"></i> Guided learning</li>
+            </a>
+          {% endif %}
+          <br>
+          <a href="{% url 'instructions' %}" title="instructions">
+            <li><i class="fa fa-info-circle" aria-hidden="true"></i> Alanno Guide</li>
+          </a>
+        </ul>
+
+        <h3>{{ project_name }}</h3>
+        <p>{{ project_description }}</p>
+
+        <br>
+
+        <ul class="header-nav__list">
+          <a href="{% url 'logout' %}">
+            <li><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</li>
+          </a>
+        </ul>
+
+      </div> <!-- end header-nav__content -->
+
+    </nav> <!-- end header-nav -->
+
+    <a class="header-menu-toggle" href="#0">
+      <span class="header-menu-text">Menu</span>
+      <span class="header-menu-icon"></span>
+    </a>
+  </header>
+
+  {% block content %}
+  <div id="main" v-cloak>
+    {% block content-area %}{% endblock %}
+  </div>
+  {% endblock %}
+
+  {% block footer %}{% endblock %}
+
+  <script src="{% static 'js/plugins.js' %}"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+
+</body>
+
+</html>

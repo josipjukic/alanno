@@ -1,0 +1,298 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block content-area %}
+
+<span id="settings">
+
+  <section id="top" class="s-admin target-section" data-parallax="scroll"
+    data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+    data-position-y=center>
+
+    <div class="overlay"></div>
+    <div class="shadow-overlay"></div>
+
+    <div class="admin-content">
+
+      <div class="row admin-content__main">
+
+        <h3>{{ project_name }}</h3>
+        <h1>Settings</h1>
+
+        {% if perms.server.add_project %}
+        <div class="admin-content__buttons">
+          <a href="#info" class="btn btn--stroke smoothscroll">
+            Project Info
+          </a>
+          <a href="#annotators" class="btn btn--stroke smoothscroll">
+            Annotators
+          </a>
+          <a href="#guidelines" class="btn btn--stroke smoothscroll">
+            Guidelines
+          </a>
+          <a href="#change-model" class="btn btn--stroke smoothscroll" v-show="project.al_mode">
+            Change model
+          </a>
+          <a href="#access" class="btn btn--stroke smoothscroll">
+            Access code
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+    </div> <!-- end admin-content -->
+
+    <ul class="admin-social">
+      {% if user.is_authenticated %}
+      <li>
+        <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+      </li>
+      <li>
+        <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+      </li>
+      <li>
+        <a href="/instructions#1"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+      </li>
+      {% endif %}
+    </ul> <!-- end admin-social -->
+
+  </section> <!-- end s-admin -->
+
+  <section id="top" class="s-projects">
+    <div class="s-general">
+
+      <div id="project-name" class="row">
+        <h1 style="font-size: 3em">[[ project.name ]]</h1>
+      </div>
+
+      <div id="info" class="row">
+        <h2 style="font-weight: bold">General information</h2><br />
+        <div class="row">
+          <div class="col-four tab-full">
+            <img style="margin-top: 0;" v-bind:src="project.image">
+          </div>
+          <div class="col-one tab-full">&nbsp;</div>
+          <div class="col-seven tab-full">
+            <ul class="stats-tabs" style="margin: 0 0">
+              <li><a href="#">[[ project.project_type ]]<em>Project Type</em></a></li>
+              <li><a href="#">[[ project.language ]]<em>Language</em></a></li>
+              <li><a href="#">[[ project.annotators ? project.annotators.length : 0 ]]<em>Annotators</em></a></li>
+              <li v-if="project.project_type === 'Classification'">
+                <a href="#">[[project.multilabel ? 'True' : 'False']]<em>Multi-label</em></a>
+              </li>
+            </ul>
+            <h3 style="display: inline-block; margin-top: 1em;">Access code:&nbsp;&nbsp;</h3>[[ project.access_code ]]
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-four tab-full">
+            <div>
+              <h3>Description</h3>
+              <p>
+                [[ project.description ]]
+              </p>
+            </div>
+          </div>
+          <div class="col-one tab-full">&nbsp;</div>
+          <div class="col-seven tab-full">
+            <div>
+              <h3>Guidelines</h3>
+              <textarea class="full-width" :value="input" @input="updateGuidelines"
+                placeholder="Enter guidelines here..." style="padding-top: 0;"></textarea>
+            </div>
+          </div>
+        </div>
+        <hr style="background-color: #33a242" />
+      </div> <!-- end row -->
+
+      <div id="annotators" class="row">
+        <h2 style="font-weight: bold">Members</h2><br />
+
+        <div>
+          <div class="row">
+            <div class="col-six tab-full">
+              <label class="typo__label" style="font-size: 1.3em">Main annotator</label>
+              <multiselect v-model="mainAnnotator" :options="mainSelectionOptions" :multiple="true" track-by="username"
+                label="username" :close-on-select="false" :max="1" placeholder="Type to search"
+                :block-keys="['Delete']">
+                <span slot="noResult">No such annotator. Consider changing the search query.</span>
+              </multiselect>
+            </div>
+            <div class="col-six tab-full">
+              <label class="typo__label" style="font-size: 1.3em">Annotator selection</label>
+              <multiselect v-model="selectedAnnotators" :options="selectionOptions" :multiple="true"
+                :close-on-select="false" group-values="annotators" group-label="group" :group-select="true"
+                placeholder="Type to search" track-by="username" label="username" :block-keys="['Delete']">
+                <span slot="noResult">No such annotator. Consider changing the search query.</span>
+              </multiselect>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-six tab-full">
+              <h3>Managers</h3>
+              <ul class="disc">
+                {% for manager in managers %}
+                <li>{{ manager.username }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="col-six tab-full">
+              <h3>Annotators</h3>
+              <ul class="disc">
+                <li v-for="annotator in project.annotators">[[ annotator.username ]]</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <hr style="background-color: #33a242" />
+      </div> <!-- end row -->
+
+      <div id="change-model" class="row" v-if="project.al_mode">
+        <h2 style="font-weight: bold">Change model</h2><br />
+
+        <div id="al_method">
+          <label for="al_method">AL method</label>
+          <select v-model="al_method" class="full-width" id="al_method_select">
+            <option id="least_conf" value="least_conf">Least confident</option>
+            <option id="margin" value="margin">Margin</option>
+            <option id="entropy" value="entropy">Entropy</option>
+            <option id="entropy_density" value="entropy_density">Entropy + Informative density</option>
+            <option id="multilab_uncert" value="multilab_uncert" v-if="project.multilabel">Multi-label uncertainty
+            </option>
+            <option id="core_set" value="core_set">Core-set</option>
+            <option id="badge" value="badge">BADGE</option>
+          </select>
+        </div>
+
+        <br>
+
+        <div id="model_name">
+          <label for="model_name">Model name</label>
+          <select v-model="model_name" class="full-width" id="model_name_select">
+            <option id="log_reg" value="log_reg">Logistic regression</option>
+            <option id="linear_svm" value="linear_svm">Linear SVM</option>
+            <option id="kernel_svm" value="kernel_svm">Kernel SVM</option>
+            <option id="rfc" value="rfc">Random forest classifier</option>
+            <option id="mlp" value="mlp">Multilayer perceptron</option>
+            <option id="rnn" value="rnn">RNN</option>
+            <option id="lstm" value="lstm">LSTM</option>
+            <option id="gru" value="gru">GRU</option>
+            <option id="bert" value="bert">BERT</option>
+          </select>
+        </div>
+
+        <br>
+
+        <div id="vectorizer_name" v-if="model_name !== 'bert'">
+          <label for="vectorizer_name">Vectorizer name</label>
+          <select v-model="vectorizer_name" class="full-width" id="vectorizer_name_select">
+            <option id="count" value="count">Count</option>
+            <option id="tf_idf" value="tf_idf">TF-IDF</option>
+            <option id="vec_avg" value="vec_avg">Average word vector</option>
+            <option id="emb_matrx" value="emb_matrx">Embedding matrix</option>
+          </select>
+        </div>
+
+        <br v-if="model_name !== 'bert'">
+
+        <div id="token_type" v-if="!using_word_vectors && model_name !== 'bert'">
+          <label for="token_type">Token type</label>
+          <select v-model="token_type" class="full-width">
+            <option value="words">Words</option>
+            <option value="chars">Characters</option>
+          </select>
+        </div>
+
+        <br v-if="!using_word_vectors && model_name !== 'bert'">
+
+        <div class="row" id="ngram" v-if="!using_word_vectors && model_name !== 'bert'">
+          <div class="col-six tab-full" id="min-ngram">
+            <label for="min-ngram">Min ngram</label>
+            <input type="number" class="full-width" v-model="min_ngram" v-bind="minNgramOptions" required>
+          </div>
+          <div class="col-six tab-full" id="max-ngram">
+            <label for="max-ngram">Max ngram</label>
+            <input type="number" class="full-width" v-model="max_ngram" v-bind="maxNgramOptions" required>
+          </div>
+        </div>
+
+        <br v-if="!using_word_vectors && model_name !== 'bert'">
+
+        <div id="adjustable_vocab" v-if="model_name !== 'bert'">
+          <label for="adjustable_vocab">Fix vocabulary</label>
+          <label class="switch">
+            <input v-model="adjustable_vocab" type="checkbox">
+            <div>
+              <span style="color: #fff;"></span>
+            </div>
+          </label>
+        </div>
+
+        <br v-if="adjustable_vocab && model_name !== 'bert'">
+
+        <div id="vocab_max_size" v-if="adjustable_vocab && model_name !== 'bert'">
+          <label for="vocab_max_size">Vocabulary max size</label>
+          <slider v-model="vocab_max_size" v-bind="vocabMaxOptions"></slider>
+        </div>
+
+        <br v-if="adjustable_vocab && model_name !== 'bert'">
+        <br v-if="adjustable_vocab && model_name !== 'bert'">
+
+        <div id="vocab_min_freq" v-if="adjustable_vocab && model_name !== 'bert'">
+          <label for="vocab_min_freq">Vocabulary min word frequency</label>
+          <slider v-model="vocab_min_freq" v-bind="vocabMinOptions"></slider>
+        </div>
+        <hr style="background-color: #33a242" />
+      </div>
+
+      <div id="delete" class="row">
+        <h2 style="font-weight: bold">Delete project</h2><br />
+        <p>
+          Please type in the project name below in order to delete the project.<br>
+          Be careful! Once you delete the project, this action <b>cannot be undone</b>.
+        </p>
+
+        <div class="alert-box alert-box--notice hideit" v-if="deleteMessage">
+          <span v-html="deleteMessage"></span>
+          <i class="fa fa-times alert-box__close" aria-hidden="true" @click="resetMessage()"></i>
+        </div>
+
+        <div style="display: flex;">
+          <input id="delete-input" class="delete-input" value="" placeholder="Type project name..."
+            v-model="confirmDelete">
+          <button id="delete-button" class="btn btn--delete" v-on:click="deleteProject()"
+            style="margin-left: 5px;">Delete</button>
+        </div>
+      </div> <!-- end row -->
+
+    </div>
+  </section>
+
+  <div class="go-top">
+    <a class="smoothscroll" title="Back to Top" href="#top"><i class="icon-arrow-up" aria-hidden="true"></i></a>
+  </div>
+
+</span>
+
+
+<!-- preloader
+    ================================================== -->
+<div id="preloader">
+  <div id="loader">
+    <div class="line-scale-pulse-out">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+<script src="https://unpkg.com/marked@0.3.6"></script>
+<script src="https://unpkg.com/lodash@4.16.0"></script>
+<script src="{% static 'bundle/settings.js' %}"></script>
+
+{% endblock %}

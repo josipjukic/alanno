@@ -1,0 +1,418 @@
+{% load static %}
+
+<!DOCTYPE html>
+<!--[if lt IE 9 ]>
+<html class="no-js oldie" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js oldie ie9" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+  <!--- basic page needs
+    ================================================== -->
+  <meta charset="utf-8">
+  <title>Alanno</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- mobile specific metas
+    ================================================== -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS
+    ================================================== -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/vue-multiselect.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/org-tree.css' %}">
+  <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+
+  <!-- script
+    ================================================== -->
+  <script src="{% static 'js/modernizr.js' %}"></script>
+  <script src="{% static 'js/pace.min.js' %}"></script>
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+
+  <!-- favicons
+    ================================================== -->
+  <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+</head>
+
+<body style="margin: 0;">
+
+  <nav class="header-nav">
+
+    <a href="#0" class="header-nav__close" title="close"><span>Close</span></a>
+
+    <div class="header-nav__content">
+      <h3>{{ user }}</h3>
+
+      <ul class="header-nav__list">
+        <a href="{% url 'home' %}" title="home">
+          <li class="current"><i class="fa fa-home" aria-hidden="true"></i> Home</li>
+        </a>
+        <a href="{% url 'projects' %}" title="projects">
+          <li><i class="fa fa-book" aria-hidden="true"></i> Projects</li>
+        </a>
+        <hr class="bg-green">
+        {% if user in managers %}
+        <a href="{% url 'settings' project_id=project_id %}" title="Settings">
+          <li><i class="fa fa-cogs" aria-hidden="true"></i> Settings</li>
+        </a>
+        <a href="{% url 'label-management' project_id=project_id %}" title="Labels">
+          <li><i class="fa fa-tags" aria-hidden="true"></i> Labels</li>
+        </a>
+        <a href="{% url 'stats' project_id=project_id %}" title="Statistics">
+          <li><i class="fa fa-bar-chart" aria-hidden="true"></i> Stats</li>
+        </a>
+        <a href="{% url 'control' project_id=project_id %}" title="Control">
+          <li><i class="fa fa-gamepad" aria-hidden="true"></i> Control</li>
+        </a>
+        <br>
+        <a href="{% url 'dataset' project_id=project_id %}" title="Data">
+          <li><i class="fa fa-database" aria-hidden="true"></i> Data</li>
+        </a>
+        <a href="{% url 'import' project_id=project_id %}" title="Import">
+          <li><i class="fa fa-upload" aria-hidden="true"></i> Import</li>
+        </a>
+        <a href="{% url 'export' project_id=project_id %}" title="Export">
+          <li><i class="fa fa-download" aria-hidden="true"></i> Export</li>
+        </a>
+        {% endif %}
+        {% if user == main_annotator %}
+        <a href="{% url 'gl_annotation' project_id=project_id %}" title="gl_annotation">
+          <li><i class="fa fa-pencil" aria-hidden="true"></i> Guided learning</li>
+        </a>
+        {% endif %}
+        <br />
+        <a href="/instructions#5" title="instructions">
+          <li><i class="fa fa-info-circle" aria-hidden="true"></i> Alanno Guide</li>
+        </a>
+      </ul>
+
+      <h3>{{ project_name }}</h3>
+      <p>{{ project_description }}</p>
+
+      <br>
+
+      <ul class="header-nav__list">
+        <a href="{% url 'logout' %}" title="Log out">
+          <li><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</li>
+        </a>
+      </ul>
+
+    </div> <!-- end header-nav__content -->
+
+  </nav> <!-- end header-nav -->
+
+  <a class="header-menu-toggle" href="#0" style="background-color: black;">
+    <span class="header-menu-text" style="background-color: black;">Menu</span>
+    <span class="header-menu-icon"></span>
+  </a>
+
+
+  {% block content %}
+  <div id="main" class="wrapper d-flex align-items-stretch">
+
+    <nav id="sidebar">
+
+      <!-- SIDEBAR MENU TRIGGER BUTTON -->
+      <div class="custom-menu">
+        <i class="fa fa-eye" style="float: right;"></i>
+        <span id="sidebarCollapse" class="btn btn-hide" style="background-color: #33a242;">
+          <i class="fa fa-angle-right"></i>
+        </span>
+      </div>
+
+      <!-- PROGRESS AND FILTERING -->
+      <div class="text-center" style="padding: 2rem;">
+
+        <!-- PROGRESS CIRCLE -->
+        <vue-ellipse-progress :progress="progress" color="#33a242" empty-color="#002f27" :size="150" :thickness="5"
+          :empty-thickness="2" :legend-value="batch_total - batch_remaining" font-size="3rem" dash="2">
+          <span slot="legend-value"> / [[ batch_total ]]</span>
+          <span slot="legend-caption">BATCH STATUS</span>
+        </vue-ellipse-progress>
+        <br>
+
+        <!-- SEARCH FILTER -->
+        <input type="text" placeholder="Search document" v-model="searchQuery" @keyup="searchDocuments"
+          style="border-bottom-color: white; color: white; padding-bottom: 0; width: 100%">
+
+        <!-- STATUS FILTERS -->
+        <span style="display: flex; justify-content: center; align-items: center">
+          <button v-for=" (opt, idx) in pick_options" :key="idx"
+            v-bind:class="{ 'btn--primary': picked === opt, 'btn-outline-primary': picked !== opt}"
+            style="padding: 10px; display: flex; align-items: center; height: 3rem; margin-right: .5rem"
+            v-on:click="onPickedChanged(opt)">
+            [[opt]]
+          </button>
+        </span>
+
+      </div>
+      <br>
+
+      <!-- PAGINATION OF DOCUMENTS -->
+      <span v-if="document_count > 0" style="margin-top: 1rem;">
+        <span class="indent">
+          Page: <strong>[[ current_page + 1 ]] / [[ num_pages ]]</strong>
+        </span>
+        <a class="btn-hide left" style="color: white;" v-on:click="getPrevPage"
+          v-shortkey="{prev1: ['ctrl' + 'arrowleft']}" @shortkey="getPrevPage">
+          <span class="icon">
+            <i class="fa fa-angle-left  "></i>
+          </span>
+          <span>Prev</span>
+        </a>
+
+
+        <a class="btn-hide right" style="color: white;" v-on:click="getNextPage"
+          v-shortkey="{next1: ['ctrl' + 'arrowright']}" @shortkey="getNextPage">
+          <span>Next</span>
+          <span class="icon">
+            <i class="fa fa-angle-right"></i>
+          </span>
+        </a>
+      </span>
+      <br>
+
+      <!-- DOCUMENT LIST -->
+      <table style="font-family: sans-serif;">
+        <tbody>
+          <tr v-for=" (doc, index) in docs" v-bind:class="{ 'active-td': index == doc_index }"
+            v-on:click="onDocumentClicked(index)" v-bind:data-preview-id="index" class="item-block">
+            <td>
+              <span class="indent" style="display: flex; justify-content: space-between;">
+                <div>
+                  [[ "[" + (start_index + index + 1) + "]" ]]
+                </div>
+                <div style="margin-left: 2%; margin-right: auto;">
+                  [[ doc.text.slice(0, 18) + (doc.text.length > 18 ? "..." : "") ]]
+                </div>
+                <div>
+                  R:[[ doc.round_number + 1 ]]
+                </div>
+                <div>
+                  <i class="fa fa-check" v-show="doc.annotations && doc.completed_by_user"></i>
+                  <div style="margin-left: 14px;" v-show="!(doc.annotations && doc.completed_by_user)"></div>
+                </div>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br>
+
+      <!-- COLOR OPTIONS -->
+      <label class="switch" style="padding-left: 1rem">
+        <input v-model="use_color" type="checkbox" id="use_color">
+        <div>
+          <span style="color: white;">Colored labels</span>
+        </div>
+      </label>
+
+    </nav>
+
+    <!-- MAIN PAGE CONTENT -->
+    <div id="content" style="padding-top: 25px !important; padding-bottom: 0px !important;">
+
+      {% if user in annotators %}
+
+      <div class="row" style="height: 0 !important;" v-if="batch_total > 0">
+        <ul class="anno-icons">
+          <li>
+            <a href="/instructions#5"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+          </li>
+          <li>
+            <a href="#" @click="isActive=!isActive"><i class="fa fa-book"
+                aria-hidden="true"></i><span>Guidelines</span></a>
+          </li>
+          <li>
+            <a href="#" @click="shortcutsActive=!shortcutsActive"><i class="fa fa-keyboard-o"
+                aria-hidden="true"></i><span>Shortcuts</span></a>
+          </li>
+        </ul>
+        <br>
+      </div>
+
+      <div class="row" v-if='batch_total==0'>
+        <div class="alert-box alert-box--info full-width hideit" style="margin-left: 5.25rem; width: 50%;">
+          There is no available data...
+          <br>
+          Please import data or send a request to the project manager.
+        </div>
+      </div>
+
+      <div class="row" v-else-if="batch_remaining==0">
+        <div class="alert-box alert-box--success full-width hideit" style="margin-left: 5.25rem; width: 50%;">
+          Well done! You have completed this batch.
+          <br>
+          To continue your annotation process, please ask the project manager for a fresh batch of documents.
+        </div>
+      </div>
+
+      <div v-if="docs.length > 0">
+
+        {% block annotation-area %} {% endblock %}
+
+        <br>
+        <br>
+
+        <div class="flex-row flex-nowrap justify-content-center align-items-center" style="padding-right: 120px">
+          <div id="button2" style="display: inline-block;">
+            <span class="btn-anno" style="background-color: #747474c2;" v-on:click="prevItem"
+              v-shortkey="{prev1: ['arrowleft']}" @shortkey="prevItem">
+              <span class="icon">
+                <i class="fa fa-chevron-left fa-2x"></i>
+              </span>
+            </span>
+          </div>
+
+          <div id="button1" style="display: inline-block;">
+            <span class="btn-anno mr-2 ml-2" v-if="docs[doc_index]" style="width: 200px"
+              v-bind:style="[docs[doc_index].completed_by_user ? {'background-color': '#c5c5c5'} : {}]"
+              v-on:click="onDocumentLock()" v-shortkey="['ctrl', 'x']" @shortkey="onDocumentLock()">
+              <span class="icon">
+                <i v-if="docs[doc_index].completed_by_user" class="fa fa-lock fa-2x"></i>
+                <i v-else class="fa fa-thumbs-up fa-2x"></i>
+              </span>
+            </span>
+          </div>
+
+          <div style="display: inline-block;">
+            <span id="button3" class="btn-anno gray-hover" style="background-color: #747474c2;" v-on:click="nextItem"
+              v-shortkey="{next1: ['arrowright']}" @shortkey="nextItem">
+              <span class="icon">
+                <i class="fa fa-chevron-right fa-2x"></i>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {% endif %}
+
+    </div>
+
+    <!-- GUIDELINES AND SHORTCUTS MODALS -->
+    <div id="main" v-cloak>
+
+      <div class="modal" :class="{ 'is-active': isActive }">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">Annotation Guidelines</h3>
+              <span class="closebtn" @click="isActive=!isActive">&times;</span>
+            </div>
+            <div class="modal-body">
+              <section style="line-height:150%" v-html="compiledMarkdown"></section>
+            </div>
+            <div class="modal-footer">
+              <button @click="isActive=!isActive">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" :class="{ 'is-active': shortcutsActive }">
+        <div class="modal-dialog modal-lg" style="width: 100%;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Shortcut Keys</h3>
+              <span class="closebtn" @click="shortcutsActive=!shortcutsActive">&times;</span>
+            </div>
+            <div class="modal-body">
+              <section style="line-height:150%">
+                <table id="shortcut-keys">
+                  <tr>
+                    <th>Functionality</th>
+                    <th>Shortcut</th>
+                  </tr>
+                  <tr>
+                    <td>Toggle completed</td>
+                    <td><code>Ctrl</code>+<code>x</code></td>
+                  </tr>
+                  <tr>
+                    <td>Next document</td>
+                    <td><code>&#8594;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Previous document</td>
+                    <td><code>&#8592;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Next page</td>
+                    <td><code>Ctrl</code>+<code>&#8592;</code></td>
+                  </tr>
+                  <tr>
+                    <td>Previous page</td>
+                    <td><code>Ctrl</code>+<code>&#8592;</code></td>
+                  </tr>
+                </table>
+              </section>
+            </div>
+            <div class="modal-footer">
+              <button @click="shortcutsActive=!shortcutsActive">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- preloader
+    ================================================== -->
+  <div id="preloader">
+    <div id="loader">
+      <div class="line-scale-pulse-out">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  {% endblock %}
+
+  {% block footer %}
+
+  {% endblock %}
+
+
+  <script src="{% static 'js/plugins.js' %}"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  <script>
+    (function ($) {
+      "use strict";
+
+      var fullHeight = function () {
+
+        $('.js-fullheight').css('height', $(window).height());
+        $(window).resize(function () {
+          $('.js-fullheight').css('height', $(window).height());
+        });
+
+      };
+      fullHeight();
+
+      $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+      });
+
+    })(jQuery);
+  </script>
+
+
+</body>
+
+</html>

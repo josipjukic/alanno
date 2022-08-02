@@ -1,0 +1,703 @@
+{% extends "general/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load templatetags %}
+
+{% block content %}
+
+
+<div id="projects_root" v-cloak>
+
+  <section id="top" class="s-admin target-section" data-parallax="scroll"
+    data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+    data-position-y=center>
+
+    <div class="overlay"></div>
+    <div class="shadow-overlay"></div>
+
+    <div class="admin-content">
+
+      <div class="row admin-content__main">
+
+        <h3>{{ user }}</h3>
+        <h1>Projects</h1>
+
+
+        <div class="admin-content__buttons">
+          {% if perms.server.add_project %}
+          <a href="#create" class="smoothscroll btn btn--stroke">
+            Create project
+          </a>
+          {% endif %}
+          <a href="#join" class="smoothscroll btn btn--stroke">
+            Join project
+          </a>
+        </div>
+
+      </div>
+
+    </div> <!-- end admin-content -->
+
+
+    <ul class="admin-social">
+      {% if user.is_authenticated %}
+        <li>
+          <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+        </li>
+        <li>
+          <a href="/instructions#0"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+        </li>
+      {% endif %}
+    </ul> <!-- end admin-social -->
+
+  </section> <!-- end s-admin -->
+
+
+  {% if form.errors %}
+          <div class="alert-box alert-box--error hideit">
+            Error occurred while creating a project. Go to the form for more information.
+            <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+          </div>
+  {% endif %}
+
+
+  <div class="row" v-if="messages.length > 0">
+      <div v-bind:class="'alert-box alert-box--' + messageType + ' hideit'">
+        <span v-for="message in messages" v-html="message"></span>
+        <i class="fa fa-times alert-box__close" aria-hidden="true" @click="resetMessages()"></i>
+      </div>
+  </div>
+
+
+  <section id="projects" class="s-general">
+
+    <div class="row">
+      <ul class="stats-tabs">
+        <li><a>[[ items.length ]]<em>Projects in total</em></a></li>
+        <li><a>[[ itemsClf ]]<em>Classification projects</em></a></li>
+        <li><a>[[ itemsSeqLab ]]<em>Sequence labeling projects</em></a></li>
+        <li><a>[[ itemsKex ]]<em>Keyphrase extraction projects</em></a></li>
+        <li><a>[[ itemsNer ]]<em>Named entity recognition projects</em></a></li>
+      </ul>
+    </div>
+
+    <div class="row">
+        <label for="projectFilter">Filter by type: </label>
+        <div class="cl-custom-select" id="projectFilter">
+          <select class="full-width" v-model="selected">
+            <option class="bg-white" selected>[[ allProjects ]]</option>
+            <option class="bg-white" v-for="choice in projectChoices">[[ choice ]]</option>
+          </select>
+        </div>
+    </div>
+
+
+    <div class="row add-bottom">
+
+      <div class="col-twelve">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Type</th>
+                <th>Language</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="project in selectedProjects">
+                <td>
+                  <div class="thumbnail-wrapper is-vertical">
+                    <div class="col-six tab-full">
+                      {% if user.is_superuser %}
+                      <a v-bind:href="'/projects/' + project.id + '/settings'">
+                        <img class="project-thumbnail" v-bind:src="project.image"></a>
+                      {% else %}
+                      <a v-if="isManager(project)" v-bind:href="'/projects/' + project.id + '/settings'">
+                        <img class="project-thumbnail" v-bind:src="project.image"></a>
+                      <a v-else v-bind:href="'/projects/' + project.id + '/annotation'">
+                        <img class="project-thumbnail" v-bind:src="project.image"></a>
+                      {% endif %}
+                      <small>[[ getDaysAgoMsg(project.updated_at) ]]</small>
+                    </div>
+                    <div class="col-six tab-full">
+                      {% if user.is_superuser %}
+                      <h1 class="p-head"><a class="black" v-bind:href="'/projects/' + project.id + '/settings'">[[
+                          project.name ]]</a>
+                      </h1>
+                      {% else %}
+                      <h1 v-if="isManager(project)" class="p-head"><a class="black" v-bind:href="'/projects/' + project.id + '/settings'">[[
+                          project.name ]]</a>
+                      </h1>
+                      <h1 v-else class="p-head"><a class="black" v-bind:href="'/projects/' + project.id + '/annotation'">[[
+                          project.name ]]</a>
+                      </h1>
+                      {% endif %}
+                      <p>[[ project.description ]]</p>
+                    </div>
+                  </div>
+
+                  <div>
+
+                  </div>
+                </td>
+
+                <td><button>[[ getProjectType(project.project_type) ]]</button></td>
+                <td><button class="btn--primary">[[ project.language ]]</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+    </div> <!-- end row -->
+
+  </section>
+
+  {% if perms.server.add_project %}
+
+  <!-- create
+    ================================================== -->
+  <section id="create" class="s-contact">
+
+    <div class="overlay"></div>
+    <div class="contact__line"></div>
+
+    <div class="row section-header" data-aos="fade-up">
+      <div class="col-full">
+        <h3 class="subhead">New project</h3>
+        <h1 class="display-2 display-2--light">Pick your poison</h1>
+      </div>
+    </div>
+
+    <div class="row contact-content" data-aos="fade-up">
+
+      <div class="contact-primary">
+
+        <h3 class="h6">Project form</h3>
+
+        <form action="" method="post">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="form-field">
+            {{ form.name.label_tag }}
+            <div class="control">
+              {% render_field form.name class="input full-width" %}
+            </div>
+            {% if form.name.help_text %}
+            <small class="form-text text-muted">{{ form.name.help_text }}</small>
+            {% endif %}
+            {% if form.name.errors %}
+            {% for error in form.name.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="form-field">
+            {{ form.description.label_tag }}
+            <div class="control">
+              {% render_field form.description class="input full-width" %}
+            </div>
+            {% if form.description.help_text %}
+            <small class="form-text text-muted">{{ form.description.help_text }}</small>
+            {% endif %}
+            {% if form.description.errors %}
+            {% for error in form.description.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="project_type" class="form-field">
+            {{ form.project_type.label_tag }}
+            <div class="control">
+              {{ form.project_type.options }}
+              {% render_field form.project_type class="input full-width" %}
+            </div>
+            {% if form.project_type.help_text %}
+            <small class="form-text text-muted">{{ form.project_type.help_text }}</small>
+            {% endif %}
+            {% if form.project_type.errors %}
+            {% for error in form.project_type.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="multilabel" class="row" style="margin: 1rem;" hidden>
+            <label class="switch">
+              {% render_field form.multilabel name="multilabel" %}
+              <div>
+                <span style="color: #fff;">Multi-label</span>
+              </div>
+            </label>
+            </label>
+            {% if form.multilabel.errors %}
+            {% for error in form.multilabel.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <!--
+          <div id="hierarchy" name="multilabel" class="row" style="margin: 1rem;" hidden>
+            <label class="switch">
+              <input type="checkbox">
+              <div>
+                <span style="color: #fff;">Hierarchy</span>
+              </div>
+            </label>
+          </div>
+          -->
+
+          <div class="form-field">
+            {{ form.language.label_tag }}
+            <div class="control">
+              {% render_field form.language class="input full-width" %}
+            </div>
+            {% if form.description.help_text %}
+            <small class="form-text text-muted">{{ form.language.help_text }}</small>
+            {% endif %}
+            {% if form.language.errors %}
+            {% for error in form.language.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="al_mode" class="row" style="margin: 1rem;">
+            <label class="switch">
+              {% render_field form.al_mode name="al_mode" %}
+              <div>
+                <span style="color: #fff;">Active Learning</span>
+              </div>
+            </label>
+            {% if form.al_mode.errors %}
+            {% for error in form.al_mode.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="al_method" class="form-field" hidden>
+            <label>AL Selection Method</label>
+            <div class="control">
+              {% render_field form.al_method class="input full-width" %}
+            </div>
+            {% if form.al_method.help_text %}
+            <small class="form-text text-muted">{{ form.AL_method.help_text }}</small>
+            {% endif %}
+            {% if form.al_method.errors %}
+            {% for error in form.al_method.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="model_name" class="form-field" hidden>
+            {{ form.model_name.label_tag }}
+            <div class="control">
+              {% render_field form.model_name class="input full-width" %}
+            </div>
+            {% if form.model_name.help_text %}
+            <small class="form-text text-muted">{{ form.model_name.help_text }}</small>
+            {% endif %}
+            {% if form.model_name.errors %}
+            {% for error in form.model_name.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="vectorizer_name" class="form-field" hidden>
+            {{ form.vectorizer_name.label_tag }}
+            <div class="control">
+              {% render_field form.vectorizer_name class="input full-width" %}
+            </div>
+            {% if form.vectorizer_name.help_text %}
+            <small class="form-text text-muted">{{ form.vectorizer_name.help_text }}</small>
+            {% endif %}
+            {% if form.vectorizer_name.errors %}
+            {% for error in form.vectorizer_name.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="token_type" class="form-field" hidden>
+            {{ form.token_type.label_tag }}
+            <div class="control">
+              {% render_field form.token_type class="input full-width" %}
+            </div>
+            {% if form.token_type.help_text %}
+            <small class="form-text text-muted">{{ form.token_type.help_text }}</small>
+            {% endif %}
+            {% if form.token_type.errors %}
+            {% for error in form.token_type.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+        <div class="flex-row">
+          <div id="min_ngram" class="flex-child form-field" hidden>
+            {{ form.min_ngram.label_tag }}
+            <div class="control">
+              {% render_field form.min_ngram class="input full-width" %}
+            </div>
+            {% if form.min_ngram.help_text %}
+            <small class="form-text text-muted">{{ form.min_ngram.help_text }}</small>
+            {% endif %}
+            <!--
+            {% if form.min_ngram.errors %}
+            {% for error in form.min_ngram.errors %}
+            <div style="margin-top: 0.2em;">
+              <small class="form-text text-muted">{{ error }}</small>
+            </div>
+            {% endfor %}
+            {% endif %}
+            -->
+          </div>
+
+          <div id="max_ngram" class="flex-child form-field" hidden>
+            {{ form.max_ngram.label_tag }}
+            <div class="control">
+              {% render_field form.max_ngram id="max_ngram_input" class="input full-width" %}
+            </div>
+            {% if form.max_ngram.help_text %}
+            <small class="form-text text-muted">{{ form.max_ngram.help_text }}</small>
+            {% endif %}
+            <!--
+            {% if form.max_ngram.errors %}
+            {% for error in form.max_ngram.errors %}
+            <div style="margin-top: 0.2em;">
+              <small class="form-text text-muted">{{ error }}</small>
+            </div>
+            {% endfor %}
+            {% endif %}
+            -->
+          </div>
+        </div>
+
+          <div id="adjustable_vocab" class="row" style="margin-top: 3rem; margin-bottom: 2rem; margin-left: 0rem;" hidden>
+            <label class="switch">
+              {% render_field form.adjustable_vocab name="adjustable_vocab" %}
+              <div>
+                <span style="color: #fff;">Fix vocabulary</span>
+              </div>
+            </label>
+            {% if form.adjustable_vocab.errors %}
+            {% for error in form.adjustable_vocab.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="vocab_max_size" class="row" style="margin: 0rem;" hidden>
+            <label>
+                <span style="color: #fff;">Vocabulary max size = </span><output style="color: #fff;">{{ form.vocab_max_size.value|mul:1000|default:1000 }}</output>
+              {% render_field form.vocab_max_size name="vocab_max_size" class="slider" type="range" min="1" max="100" value="1" step="1" oninput="this.previousElementSibling.value = this.value*1000"%}
+            </label>
+            {% if form.vocab_max_size.errors %}
+            {% for error in form.vocab_max_size.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <div id="vocab_min_freq" class="row" style="margin: 0rem;" hidden>
+            <label>
+                <span style="color: #fff;">Vocabulary min word frequency = </span><output style="color: #fff;">{{ form.vocab_min_freq.value|default:1 }}</output>
+              {% render_field form.vocab_min_freq name="vocab_min_freq" class="slider" type="range" min="1" max="25" value="1" oninput="this.previousElementSibling.value = this.value"%}
+            </label>
+            {% if form.vocab_min_freq.errors %}
+            {% for error in form.vocab_min_freq.errors %}
+            <div style="margin-top: 0.2em;">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+          </div>
+
+          <button class="full-width btn--primary">Create</button>
+        </form>
+
+        <!-- contact-warning -->
+        <div class="message-warning">
+          Something went wrong. Please try again.
+        </div>
+
+        <!-- contact-success -->
+        <div class="message-success">
+          Your message was sent, thank you!<br>
+        </div>
+
+      </div> <!-- end contact-primary -->
+
+      <div class="contact-secondary">
+        <div class="contact-info">
+
+          <h3 class="h6 hide-on-fullwidth">Contact Info</h3>
+
+          <div class="cinfo">
+            <h5>Where to Find Us</h5>
+            <p>
+              TakeLab<br>
+              Faculty of Electrical Engineering and Computing, University of Zagreb<br>
+              Unska ulica 3, Zagreb, Croatia<br>
+            </p>
+          </div>
+
+          <div class="cinfo">
+            <h5>Email Us At</h5>
+            <p>
+              josip.jukic@fer.hr
+            </p>
+          </div>
+
+          <div class="cinfo">
+            <h5>Call Us At</h5>
+            <p>
+              Phone: (+63) 555 1212<br>
+              Mobile: (+63) 555 0100<br>
+              Fax: (+63) 555 0101
+            </p>
+          </div>
+
+        </div> <!-- end contact-info -->
+      </div> <!-- end contact-secondary -->
+
+    </div> <!-- end contact-content -->
+
+
+
+  </section> <!-- end s-contact -->
+
+
+  {% endif %}
+
+  <footer>
+    <div id="join" class="row footer-main">
+
+      <div class="col-six tab-full left footer-subscribe">
+
+        <h4>Join project</h4>
+        <p>You can join a certain project via access code.</p>
+
+
+        <div>
+          <input class="access-input" value="" placeholder="Access code" required="true" minlength="32"
+            v-model="access_code">
+          <a href="#projects" class="smoothscroll btn btn--primary full-width" v-on:click="joinProject()">
+            Join
+          </a>
+        </div>
+      </div>
+
+      <div class="col-six tab-full right footer-subscribe">
+
+        <p>Project manager can provide you with the access code.</p>
+
+
+      </div>
+
+    </div> <!-- end footer-main -->
+  </footer>
+
+</div>
+
+<div class="go-top">
+  <a class="smoothscroll" title="Back to Top" href="#top"><i class="icon-arrow-up" aria-hidden="true"></i></a>
+</div>
+
+<!-- preloader
+    ================================================== -->
+<div id="preloader">
+  <div id="loader">
+    <div class="line-scale-pulse-out">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'bundle/projects.js' %}"></script>
+<script>
+  $(window).on('load',function () {
+   var selectedProjectType = $('#project_type :selected').val();
+   var selectedAL = $('#al_mode :checked').val();
+   var selectedVectorizer = $('#vectorizer_name :selected').val();
+   var selectedVocab = $('#adjustable_vocab :checked').val();
+   var selectedModel = $('#model_name :checked').val();
+   if (selectedProjectType === "Classification") {
+     $('#multilabel').show();
+   }
+   if (selectedAL === "on") {
+     $('#al_method').show();
+     $('#model_name').show();
+     if (selectedModel !== "bert"){
+       $('#vectorizer_name').show();
+       if (selectedVectorizer === "count" || selectedVectorizer === "tf_idf") {
+            $('#token_type').show();
+            $('#min_ngram').show();
+            $('#max_ngram').show();
+       }
+       $('#adjustable_vocab').show();
+       if (selectedVocab === "on") {
+            $('#vocab_max_size').show();
+            $('#vocab_min_freq').show();
+       }
+     }
+   }
+  });
+</script>
+<script>
+  $('#al_mode').change(function () {
+    var valueSelected = $('#al_mode :checked').val();
+    var valueSelectedVectorizer = $('#vectorizer_name :selected').val();
+    var valueSelectedVocab = $('#adjustable_vocab :checked').val();
+    var valueSelectedModel = $('#model_name :checked').val();
+    console.log(valueSelected);
+    if (valueSelected === "on") {
+      $('#al_method').show();
+      $('#model_name').show();
+      if (valueSelectedModel !== "bert"){
+        $('#vectorizer_name').show();
+        $('#adjustable_vocab').show();
+        if (valueSelectedVectorizer === "count" || valueSelectedVectorizer === "tf_idf") {
+          $('#token_type').show();
+          $('#min_ngram').show();
+          $('#max_ngram').show();
+        }
+        if (valueSelectedVocab === "on") {
+          $('#vocab_max_size').show();
+          $('#vocab_min_freq').show();
+        }
+      }
+    }
+    else {
+      $('#al_method').hide();
+      $('#model_name').hide();
+      $('#vectorizer_name').hide();
+      $('#adjustable_vocab').hide();
+      $('#token_type').hide();
+      $('#min_ngram').hide();
+      $('#max_ngram').hide();
+      $('#vocab_max_size').hide();
+      $('#vocab_min_freq').hide();
+    }
+  });
+
+</script>
+<script>
+  $('#model_name').change(function () {
+    var valueSelected = $('#model_name :selected').val();
+    var valueSelectedVocab = $('#adjustable_vocab :checked').val();
+    var valueSelectedVectorizer = $('#vectorizer_name :selected').val();
+    console.log(valueSelected);
+    if (valueSelected !== "bert") {
+      $('#vectorizer_name').show();
+      $('#adjustable_vocab').show();
+      if (valueSelectedVocab === "on") {
+        $('#vocab_max_size').show();
+        $('#vocab_min_freq').show();
+      }
+      if (valueSelectedVectorizer === "count" || valueSelectedVectorizer === "tf_idf") {
+        $('#token_type').show();
+        $('#min_ngram').show();
+        $('#max_ngram').show();
+      }
+    }
+    else {
+      $('#vectorizer_name').hide();
+      $('#adjustable_vocab').hide();
+      $('#vocab_max_size').hide();
+      $('#vocab_min_freq').hide();
+      $('#token_type').hide();
+      $('#min_ngram').hide();
+      $('#max_ngram').hide();
+    }
+   });
+</script>
+<script>
+  $('#vectorizer_name').change(function () {
+    var valueSelected = $('#vectorizer_name :selected').val();
+    console.log(valueSelected);
+    if (valueSelected === "count" || valueSelected === "tf_idf") {
+      $('#token_type').show();
+      $('#min_ngram').show();
+      $('#max_ngram').show();
+    }
+    else {
+      $('#token_type').hide();
+      $('#min_ngram').hide();
+      $('#max_ngram').hide();
+    }
+   });
+</script>
+<script>
+  $('#adjustable_vocab').change(function () {
+    var valueSelected = $('#adjustable_vocab :checked').val();
+    console.log(valueSelected);
+    if (valueSelected === "on") {
+      $('#vocab_max_size').show();
+      $('#vocab_min_freq').show();
+    }
+    else {
+      $('#vocab_max_size').hide();
+      $('#vocab_min_freq').hide();
+    }
+  });
+</script>
+<script>
+  $('#project_type').change(function () {
+    var valueSelected = $('#project_type :selected').val();
+    console.log(valueSelected);
+    if (valueSelected === "Classification") {
+      $('#multilabel').show();
+      //$('#hierarchy').show();
+    }
+    else {
+      $('#multilabel').hide();
+      //$('#hierarchy').hide();
+    }
+  });
+</script>
+{% endblock %}

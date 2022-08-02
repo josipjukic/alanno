@@ -1,0 +1,131 @@
+{% extends "general/base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+
+
+<section id="signin" class="s-sign" style="padding-bottom: 25rem;">
+
+  <div class="overlay"></div>
+  <div class="shadow-overlay"></div>
+
+  <div class="row section-header">
+    <div class="col-full">
+      <h1 class="subhead">Ready for Active Learning?</h1>
+    </div>
+    <h1 class="display-2 display-2--light">Every day is a good day to learn.</h1>
+  </div>
+
+
+  <div class="row sign-content" data-aos="fade-up">
+
+    <div class="sign-primary">
+
+      <h3 class="h6">Login form</h3>
+
+      {% if form.non_field_errors %}
+      <div class="alert-box alert-box--error hideit">
+        {% for error in form.non_field_errors %}
+        {{ error }}
+        {% endfor %}
+        <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+      </div>
+      {% endif %}
+
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert-box alert-box--{{ message.tags }} hideit">
+        {{ message }}
+        <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <!-- {% if form.errors %}
+          <div class="alert-box alert-box--error hideit">
+            Your username and password didn't match. Please try again.
+            <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+          </div>
+        {% endif %} -->
+      {% if next %}
+      {% if user.is_authenticated %}
+      <div class="alert-box alert-box--notice hideit">
+        Your account doesn't have access to this page. To proceed, please sign in with an account that has access.
+        <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+      </div>
+      {% else %}
+      <div class="alert-box alert-box--info hideit">
+        Please sign in to see this page.
+        <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+      </div>
+      {% endif %}
+      {% endif %}
+
+
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+        <div class="form-field">
+          {% if field.errors %}
+          <div class="alert-box alert-box--error hideit">
+            {{ field.errors }}
+            <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+          </div>
+          {% endif %}
+          {% if field.help_text %}
+          <small class="form-text text-muted">{{ field.help_text }}</small>
+          {% endif %}
+          <label class="label">{{ field.label_tag }}</label>
+          {% render_field field class="input full-width" %}
+        </div>
+        {% endfor %}
+        <button class="full-width btn--primary">Sign In</button>
+        <input type="hidden" name="next" value="{{ next }}" />
+
+        <div class="border-top pt-3">
+          <small class="text-muted">
+            Don't have an account? <a href="{% url 'register' %}">Register here</a>
+          </small>
+        </div>
+      </form>
+
+    </div> <!-- end sign-primary -->
+
+    <div class="sign-secondary">
+      <div class="sign-info">
+
+        <h3 class="h6 hide-on-fullwidth" style="margin-bottom: 60px;">Contact Info</h3>
+
+        <div class="cinfo" style="margin-bottom: 45px;">
+          <h5 style="margin-bottom: 10px;">Where to Find Us</h5>
+          <p>
+            TakeLab<br>
+            Faculty of Electrical Engineering and Computing<br>
+            University of Zagreb
+          </p>
+        </div>
+
+        <div class="cinfo">
+          <h5 style="margin-bottom: 10px;">Email Us At</h5>
+          <p>
+            josip.jukic@fer.hr
+          </p>
+        </div>
+
+      </div> <!-- end sign-info -->
+    </div> <!-- end sign-secondary -->
+
+  </div> <!-- end sign-content -->
+
+
+  <ul class="home-social">
+    <li>
+      <a href="{% url 'register' %}"><i class="fa fa-user-plus" aria-hidden="true"></i><span>Register</span></a>
+    </li>
+  </ul>
+  <!-- end home-social -->
+
+</section> <!-- end s-sign -->
+
+
+{% endblock %}

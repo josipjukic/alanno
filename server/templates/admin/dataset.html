@@ -1,0 +1,240 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block content-area %}
+
+
+<section id='top' class="s-admin target-section" data-parallax="scroll"
+  data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+  data-position-y=center>
+
+  <div class="overlay"></div>
+  <div class="shadow-overlay"></div>
+
+  <div class="admin-content">
+    <div class="row admin-content__main">
+      <h3>{{ project_name }}</h3>
+      <h1>Dataset</h1>
+    </div>
+
+    <ul class="admin-social">
+      {% if user.is_authenticated %}
+      <li>
+        <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+      </li>
+      <li>
+        <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+      </li>
+      <li>
+        <a href="/instructions#3"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+      </li>
+      {% endif %}
+    </ul> <!-- end admin-social -->
+  </div>
+</section>
+
+
+<div id="dataset">
+  <section class="s-projects">
+
+    <div class="row add-bottom">
+
+      <div class="col-twelve">
+        <div class="table-responsive">
+
+          {% if messages %}
+          {% for message in messages %}
+          <div class="alert-box alert-box--{{ message.tags }} hideit">
+            {{ message }}
+            <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+          </div>
+          {% endfor %}
+          {% endif %}
+
+          <!-- SEARCH FILTER -->
+          <input type="text" placeholder="Search document" v-model="searchQuery" @keyup="loadPage"
+            style="margin-top: 1rem; border-bottom-color: black; color: black; padding-bottom: 0; width: 100%">
+
+          <!-- STATUS FILTERS -->
+          <span style="display: flex; justify-content: center; align-items: center">
+            <button v-for=" (opt, idx) in filter_options" :key="idx"
+              v-bind:class="{ 'btn--primary': filter === opt, 'btn-outline-primary': filter !== opt}"
+              style="padding: 10px; display: flex; align-items: center; height: 3rem; margin-right: .5rem"
+              v-on:click="onPickedChanged(opt)">
+              [[opt]]
+            </button>
+          </span>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="font-family: montserrat-light; font-size: 1.2em">#</th>
+                <th style="font-family: montserrat-light; font-size: 1.2em">ID</th>
+                <th style="font-family: montserrat-light; font-size: 1.2em">Text</th>
+                <th style="font-family: montserrat-light; font-size: 1.2em">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-if="notEmpty">
+                <tr v-for="doc in truncatedDocs">
+                  <td>[[ doc.order ]]</td>
+                  <td>[[ doc.id ]]</td>
+                  <td class="data-td">[[ doc.text ]]</td>
+                  <td><button class="btn" @click="expandCell(doc.id)">Info</button></td>
+                  <td><button class="btn" @click="ask(doc.id)">Delete</button></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-twelve">
+        <div style="display: flex; flex-direction: row; justify-content: space-between;">
+          <div class="align-self-start">
+            <button v-bind:class="{ 'btn--primary': hasPrevious, 'btn': !hasPrevious }" @click="getPrevPage()"
+              v-bind:disabled="!hasPrevious">Previous</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; justify-content: center">
+            <h4 style="margin-top: 0; margin-bottom: 0;"> Page [[pageNbr]]/[[pageMaxNbr]] </h4>
+          </div>
+
+          <div class="align-self-end">
+            <button v-bind:class="{ 'btn--primary': hasNext, 'btn': !hasNext }" @click="getNextPage()"
+              v-bind:disabled="!hasNext">Next</button>
+          </div>
+        </div>
+      </div>
+      <hr class="w-100" />
+
+      <div class="col-twelve">
+        <div style="display: flex; flex-direction: row; justify-content: end">
+          <button class="btn--delete" @click="askForAll()">
+            Delete all
+          </button>
+        </div>
+      </div>
+
+
+    </div> <!-- end row -->
+  </section>
+
+  <!-- Show whole document pop-up -->
+  <div class="modal p-5" :class="{ 'is-active': isActive }">
+    <div class="modal-dialog modal-lg p-5" role="document" style="width: 100%">
+      <div class="modal-content pl-5 pr-5">
+        <div class="modal-header">
+          <h3 class="modal-title mt-4">Document [[ doc_id ]]</h3>
+          <span class="closebtn" @click="isActive=!isActive">&times;</span>
+        </div>
+        <div class="modal-body">
+          <section class="modal-card-body">
+            <strong>Text:</strong>
+          </section>
+          <section class="modal-card-body">
+            <p v-html="getDocText"></p>
+          </section>
+          <section class="modal-card-body">
+            <strong>Round:</strong>
+            <p v-if="doc_round_number !== null && doc_round_number !== undefined">[['# ' + (doc_round_number + 1) ]]</p>
+            <p v-else>The document has not yet been distributed.</p>
+          </section>
+          <section class="modal-card-body">
+            <strong>Annotators:</strong>
+          </section>
+          <section class="modal-card-body">
+            <ul v-if="doc_selectors.length > 0">
+              <li v-for="anno in doc_selectors">
+                [[ anno ]]
+              </li>
+            </ul>
+            <p v-else>The document has no active annotators.</p>
+          </section>
+          <section class="modal-card-body">
+            <strong>Completed by:</strong>
+          </section>
+          <section class="modal-card-body">
+            <ul v-if="doc_completed.length > 0">
+              <li v-for="anno in doc_completed">
+                [[ anno ]]
+              </li>
+            </ul>
+            <p v-else>No annotator has completed this document yet.</p>
+          </section>
+          <section class="modal-card-body">
+            <strong>Annotations:</strong>
+          </section>
+          <section class="modal-card-body">
+            <ul v-if="doc_annotations.length > 0">
+              <li v-for="anno in doc_annotations">
+                [[ anno.annotator ]] -> [[ anno.label_text ]]
+              </li>
+            </ul>
+            <p v-else>The document has no annotations.</p>
+          </section>
+        </div>
+        <div class="modal-footer">
+          <button @click="isActive=!isActive">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Delete pop-up -->
+  <div class="modal" :class="{ 'is-active': isDelete }">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Delete document</h3>
+          <span class="closebtn" @click="isDelete=!isDelete">&times;</span>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this document?
+        </div>
+        <div class="modal-footer">
+          <button class="btn--delete" @click="deleteDocument()">Delete</button>
+          <button @click="isDelete=!isDelete">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Delete all pop-up -->
+  <div class="modal" :class="{ 'is-active': isDeleteAll }">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Delete document</h3>
+          <span class="closebtn" @click="isDeleteAll=!isDeleteAll">&times;</span>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete <strong>ALL</strong> of the documents?
+        </div>
+        <div class="modal-footer">
+          <button class="btn--delete" @click="deleteAllDocuments()">Delete</button>
+          <button @click="isDeleteAll=!isDeleteAll">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- preloader
+    ================================================== -->
+<div id="preloader">
+  <div id="loader">
+    <div class="line-scale-pulse-out">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'bundle/dataset.js' %}"></script>
+{% endblock %}

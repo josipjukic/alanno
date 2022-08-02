@@ -1,0 +1,244 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block content-area %}
+
+
+<section id="control" class="s-admin target-section" data-parallax="scroll"
+    data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+    data-position-y=center>
+
+  <div class="overlay"></div>
+  <div class="shadow-overlay"></div>
+
+  <div class="admin-content">
+    <div class="row admin-content__main">
+      <h3>{{ project_name }}</h3>
+      <h1>Labels</h1>
+    </div>
+
+    <ul class="admin-social">
+      {% if user.is_authenticated %}
+        <li>
+          <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+        </li>
+        <li>
+          <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+        </li>
+        <li>
+          <a href="/instructions#2"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+        </li>
+      {% endif %}
+    </ul> <!-- end admin-social -->
+  </div>
+</section>
+
+{% if hierarchy %}
+
+<div id="hier">
+
+  <div>
+    <vue2-org-tree :data="treeData" :horizontal="horizontal" :collapsable="collapsable" :render-content="renderContent"
+      :label-class-name="labelClassName" @on-expand="onExpand" @on-node-click="onNodeClick"
+      selected-class-name="selected-node" selected-key="selected" />
+  </div>
+  <div class="card">
+    <header class="card-header">
+      <p class="card-header-title">
+        Label editor - hierarchy
+      </p>
+      <a href="#" class="card-header-icon" aria-label="more options">
+        <span class="icon">
+          <i class="fas fa-angle-down" aria-hidden="true"></i>
+        </span>
+      </a>
+    </header>
+
+    <div class="card-content">
+      <div class="has-text-right">
+        <div class="field is-grouped is-grouped-multiline has-text-weight-bold pbrem075">
+          <div class="control" v-for="label in labels">
+            <div>
+              <span class="md-chips">
+                <div class="md-chip md-chip-hover"
+                  v-bind:style="{ color: label.text_color, background-color: label.background_color }">
+                  <div class="md-chip-icon">[[ label.shortcut ]]</div>
+                  [[ label.text ]]
+                </div>
+                <div class="md-chip">
+                  <span>Chip chip chip</span>
+                  <button type="button" class="md-chip-remove">
+                  </button>
+                </div>
+              </span>
+              <!-- <span class="tag" v-bind:style="{ color: label.text_color, background-color: label.background_color }">
+                <div class="close" @click="removeLabel(label)"></div>
+                [[ label.text ]]
+              </span>
+              <span class="tag is-medium">[[ label.shortcut ]]</span> -->
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+          <label class="label column is-3 mb0">Preview</label>
+          <div class="control column is-6">
+            <div>
+              <a class="tag" v-bind:style="{ color: textColor, background-color: backgroundColor }">
+                [[ labelText ]]
+              </a>
+              <span>[ [[ selectedShortkey ]] ]</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+          <label class="label column is-3 mb0">Label Name</label>
+          <div class="control column is-6">
+            <input class="input" type="text" placeholder="Text input" maxlength="50" v-model="labelText">
+          </div>
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+          <label class="label column is-3 mb0">Parent</label>
+          <div class="control column is-6">
+            <select v-model="parent">
+              <option v-for="label in labels">[[ label.text ]]</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+          <label class="label column is-3 mb0">Leaf</label>
+          <input type="checkbox" id="isLeaf" v-model="isLeaf">
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+          <label class="label column is-3 mb0">Shortcut Key</label>
+          <div class="control column is-6">
+            <div class="select">
+              <select v-model="selectedShortkey">
+                {% for ch in 'abcdefghijklmnopqrstuvwxyz' %}
+                <option class="bg-white">{{ ch }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+
+          <label class="label column is-3 mb0">Background Color</label>
+          <div class="control column is-6">
+            <input class="input" type="color" v-model="backgroundColor">
+          </div>
+        </div>
+
+        <div class="field is-horizontal bordered-row">
+          <label class="label column is-3 mb0">Text Color</label>
+          <div class="control column is-6">
+            <input class="input" type="color" v-model="textColor">
+          </div>
+        </div>
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button class="button is-primary" @click="addLabel()">Add label</button>
+          </div>
+          <div class="control">
+            <button class="button is-text" @click="reset()">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  {% else %}
+
+  <div class="row" id="reg">
+    <div class="col-six tab-full">
+      <h3>Label editor</h3>
+
+      <div class="form-field">
+        <label class="label">Preview</label>
+        <div>
+          <div class="md-chips">
+            <div class="md-chip md-chip-hover">
+              <div class="md-chip-icon" v-bind:style="{ color: textColor, 'background-color': backgroundColor }">
+                [[ selectedShortkey ]]
+              </div>
+              [[ labelText ]]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-horizontal bordered-row">
+        <label class="label column is-3 mb0">Label Name</label>
+        <div class="control column is-6">
+          <input v-on:keyup.enter="onEnter" id="label_name" class="input" type="text" placeholder="Input" maxlength="50" v-model="labelText">
+        </div>
+      </div>
+
+      <div class="field is-horizontal bordered-row">
+        <label class="label column is-3 mb0">Shortcut Key</label>
+        <div class="control column is-6">
+          <div class="select">
+            <select v-on:keyup.enter="onEnter" v-model="selectedShortkey">
+              <option disabled value="">Please choose one</option>
+              {% for ch in 'abcdefghijklmnopqrstuvwxyz' %}
+              <option>{{ ch }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+
+      <label>Background Color</label>
+      <div>
+        <input class="input" type="color" v-model="backgroundColor">
+      </div>
+
+      <div class="form-field">
+        <label>Text Color</label>
+        <div>
+          <input class="input" type="color" v-model="textColor">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <button class="button is-primary" @click="addLabel()">Add label</button>
+        <button class="button is-text" @click="reset()">Reset</button>
+      </div>
+    </div>
+
+    <div class="col-six tab-full">
+      <h3>Label list</h3>
+      <span class="control" v-for="label in labels">
+        <span>
+          <span class="md-chips">
+            <span class="md-chip md-chip-hover">
+              <span class="md-chip-icon"
+                v-bind:style="{ color: textColor, 'background-color': label.background_color }">
+                [[ label.shortcut ]]
+              </span>
+              [[ label.text ]]
+              <span class="md-chip-remove" @click="removeLabel(label)">&nbsp;&nbsp;</span>
+            </span>
+
+          </span>
+        </span>
+
+    </div>
+  </div>
+
+  {% endif %}
+
+  <span id="reg"></span>
+  <span id="hier"></span>
+
+  {% endblock %}
+  {% block footer %}
+  <script src="{% static 'bundle/label.js' %}"></script>
+  {% endblock %}

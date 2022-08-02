@@ -1,0 +1,226 @@
+/* hr {
+  border: 0;
+  clear: both;
+  display: block;
+  width: 100%;               
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 1 px;
+} */
+
+.textcell:hover {
+  background-color:rgb(192, 238, 240);
+  cursor: pointer;
+}
+
+.aside {
+  display: block;
+  background-color: #2a2e2f;
+  border-right: 1px solid #DEDEDE;
+}
+
+.messages {
+  display: block;
+  background-color: #f3f3f3;
+  border-right: 1px solid #DEDEDE;
+}
+
+.message {
+  display: block;
+  background-color: #f3f3f3;
+}
+
+.aside .main {
+  padding: 20px 40px;
+  color: #6F7B7E;
+}
+
+.aside .title {
+  color: #6F7B7E;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.aside .main .item {
+  display: flex;
+  padding: 10px 0;
+  color: #6F7B7E;
+}
+
+.aside .main .item.active {
+  background-color: #5a5e5f;
+  margin: 0 -50px;
+  padding-left: 50px;
+}
+
+.aside .main .item:active,
+.aside .main .item:hover {
+  background-color: #5a5e5f;
+  margin: 0 -50px;
+  padding-left: 50px;
+}
+
+.aside .main .icon {
+  font-size: 19px;
+  padding-right: 30px;
+  color: #f3f3f3;
+}
+
+.aside .main .name {
+  font-size: 15px;
+  color: #f3f3f3;
+  font-weight: 500;
+}
+
+.messages {
+  padding: 40px 20px;
+}
+
+.message {
+  padding: 40px 20px;
+}
+
+.content {
+  font-size: 16pt;
+  line-height: 250%;
+}
+
+.bordered-row {
+  border-color: #dfe8f1;
+  border-top-width: 1px;
+  border-top-style: dashed;
+  align-items: center;
+  padding-top: .75rem;
+}
+
+#editor {
+  line-height: 100%;
+}
+.editorMarkdown_textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  /*border: none;*/
+  /*border-right: 1px solid #ccc;*/
+  border: 1px solid #dbdbdb;
+  outline: none;
+  /*background-color: #fff;*/
+  font-size: 14px;
+  font-family: 'Monaco', courier, monospace;
+  padding: 20px;
+}
+
+.loader-wrapper {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 2147483648 !important;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: #242f3f;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  position: relative;
+  border: 4px solid #Fff;
+  animation: loader 2s infinite ease;
+}
+
+.loader-inner {
+  vertical-align: top;
+  display: inline-block;
+  width: 100%;
+  background-color: #fff;
+  animation: loader-inner 2s infinite ease-in;
+}
+
+@keyframes loader {
+  0% { transform: rotate(0deg);}
+  25% { transform: rotate(180deg);}
+  50% { transform: rotate(180deg);}
+  75% { transform: rotate(360deg);}
+  100% { transform: rotate(360deg);}
+}
+
+@keyframes loader-inner {
+  0% { height: 0%;}
+  25% { height: 0%;}
+  50% { height: 100%;}
+  75% { height: 100%;}
+  100% { height: 0%;}
+}
+
+.select-css {
+	display: block;
+	font-size: 16px;
+	font-family: sans-serif;
+	font-weight: 700;
+	color: #444;
+	line-height: 1.3;
+	padding: .6em 1.4em .5em .8em;
+	width: 20%;
+	max-width: 20%;
+	box-sizing: border-box;
+  margin: 0;
+  margin-left: 1em;
+	border: 1px solid #aaa;
+	box-shadow: 0 1px 0 1px rgba(0,0,0);
+	border-radius: .5em;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: #fff;
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'),
+	  linear-gradient(to bottom, #ffffff 0%,#e5e5e5 100%);
+	background-repeat: no-repeat, repeat;
+	background-position: right .7em top 50%, 0 0;
+	background-size: .65em auto, 100%;
+}
+.select-css::-ms-expand {
+	display: none;
+}
+.select-css:hover {
+	border-color: #888;
+}
+.select-css:focus {
+	border-color: #aaa;
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
+	box-shadow: 0 0 0 3px -moz-mac-focusring;
+	color: #222;
+	outline: none;
+}
+.select-css option {
+	font-weight:normal;
+}
+
+.df-style {
+  font-size: 11pt; 
+  font-family: Arial;
+  border-collapse: collapse; 
+  border: 1px solid silver;
+
+}
+
+.df-style td, th {
+  padding: 5px;
+}
+
+.df-style tr:nth-child(even) {
+  background: #E0E0E0;
+}
+
+.df-style tr:hover {
+  background: silver;
+  cursor: pointer;
+}
+
+
+[v-cloak] { display: none; }

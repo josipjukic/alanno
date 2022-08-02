@@ -1,0 +1,239 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block content-area %}
+
+<span id="stats">
+
+  <section id="top" class="s-admin target-section" data-parallax="scroll"
+    data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+    data-position-y=center>
+
+    <div class="overlay"></div>
+    <div class="shadow-overlay"></div>
+
+    <div class="admin-content">
+
+      <div class="row admin-content__main">
+
+        <h3>{{ project_name }}</h3>
+        <h1>Statistics</h1>
+
+        {% if data_ready %}
+          <div class="admin-content__buttons">
+            {% if al_mode %}
+              <a href="#al-sg" class="btn btn--stroke smoothscroll">
+                Performance
+              </a>
+            {% endif %}
+            <a href="#anno-sg" class="btn btn--stroke smoothscroll">
+              Progress
+            </a>
+            <a href="#label-sg" class="btn btn--stroke smoothscroll">
+              Labels
+            </a>
+            <a href="#iaa-sg" class="btn btn--stroke smoothscroll">
+              IAA
+            </a>
+          </div>
+        {% endif %}
+
+      </div>
+
+    </div> <!-- end admin-content -->
+
+    <ul class="admin-social">
+      {% if user.is_authenticated %}
+        <li>
+          <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+        </li>
+        <li>
+          <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+        </li>
+        <li>
+          <a href="/instructions#6"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+        </li>
+      {% endif %}
+    </ul> <!-- end admin-social -->
+
+  </section> <!-- end s-admin -->
+
+  {% if not data_ready %}
+
+    <div class='progress-wrapper'>
+      <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+    </div>
+    <div id="progress-bar-message"></div>
+
+  {% else %}
+
+    <section id="top" class="s-projects">
+      <section class="s-general">
+
+        <!-- DASHBOARD CONTAINER -->
+        <div style="display: flex; flex-direction: column; justify-content: start; align-items: center; width: 100%; margin-top: 50px">
+
+          <!-- MAIN ROW CONTAINER -->
+          <div class="stats-graph" style="display: flex; flex-direction: row; flex-wrap: wrap; column-gap: 50px; justify-content: space-around; align-items: stretch; width: 80%">
+
+            <!-- CONTROL BAR -->
+            <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 40px">
+              <div>
+                <h5 style="text-align: left; margin-top: 0">Filter by round: </h5>
+                <div>
+                   <select v-model="selected" style="margin-bottom: 0">
+                    <option selected>[[ allRounds ]]</option>
+                    <option v-for="choice in roundChoices" v-bind:value="choice">[[ parseInt(choice) + 1 ]]</option>
+                  </select>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <button v-on:click="forceUpdate" class="btn--primary">Force update</button>
+                <p style="margin-top: 0; margin-bottom: 0; color: #666666">Last updated: <span style="font-style: italic; font-weight: normal">[[ lastUpdated ]]</span></p>
+              </div>
+            </div>
+
+            {% if al_mode %}
+              <stats-card id="al-sg" v-if="modelTrain || modelTestConfidence" title="Model performance" style="width: 100%">
+                <div style="display: flex; flex-direction: row; justify-content: center; width: 100%; flex-wrap: wrap; gap: 2em 2em; padding: 2em 1em 4em 1em">
+                  <div v-if="modelTrain" style="display: flex; flex-direction: column; justify-content: start; align-items: center; flex-grow: 1;">
+                    <h4 style="margin: 0; margin-bottom: 1em;">Train</h4>
+                    <line-chart style="min-width: 500px" :chart-data="modelTrain"></line-chart>
+                  </div>
+                  <div v-if="modelTestConfidence" style="display: flex; flex-direction: column; justify-content: start; align-items: center; flex-grow: 1;">
+                    <h4 style="margin: 0; margin-bottom: 1em;">Test</h4>
+                    <confidence-line style="min-width: 500px" :chart-data="modelTestConfidence"></confidence-line>
+                  </div>
+                </div>
+              </stats-card>
+            {% endif %}
+
+            <!-- ANNOTATION PROGRESS CARD -->
+            <stats-card id="anno-sg" v-if="progress && annotators" title="Annotation progress" style="flex-grow: 2; width: 100%">
+              <div style="display: flex; flex-direction: column; width: 100%; padding: 20px; font-family: montserrat-bold">
+
+                <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: center; width: 100%;">
+                  <apexchart type="radialBar" height="300" :options="radialBarOptions" :series="annotators.percentage">
+                  </apexchart>
+                </div>
+
+                <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-evenly; width: 100%; padding: 10px 20px 20px 20px">
+
+                  <div v-for="anno in annotators.all" style="display: flex; flex-direction: column; justify-content: start; align-items: center">
+                    <vue-ellipse-progress :progress="anno.percentage" color="#33a242" empty-color="#002f27" :size="100"
+                      :thickness="6" :empty-thickness="2" :legend-value="anno.completed" font-size="1.8rem" dash="4">
+                      <span slot="legend-value"> / [[ anno.total ]] </span>
+                    </vue-ellipse-progress>
+                    <div style="text-align: center; margin-top: 1em;">
+                      [[ anno.username ]] <br/>
+                      Total time: <span style="font-family: montserrat-light;">[[ formatTime(timeStats[anno.username].total) ]]</span> <br/>
+                      Average time: <span style="font-family: montserrat-light;">[[ formatTime(timeStats[anno.username].average) ]]</span>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </stats-card>
+
+            <!-- DISTRIBUTION STATUS CARD -->
+            <stats-card id="dist-sg" v-if="progress" title="Distribution progress" style="flex-grow: 1; min-width: 20%;">
+              <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 50px 50px 50px 50px;">
+                <a style="display: block;" href="#dist-sg">
+                  <vue-ellipse-progress :progress="progress.percentage" color="#33a242" empty-color="#002f27" :size="280"
+                    :thickness="10" :empty-thickness="4" :legend-value="progress.distributed" font-size="2rem" dash="3">
+                    <span slot="legend-value"> / [[ progress.total ]]</span>
+                    <span slot="legend-caption">Distributed</span>
+                  </vue-ellipse-progress>
+                </a>
+                <div style="display: flex; flex-direction: row; justify-content: center; align-items: end; margin-top: 50px; width: 100%">
+                  <h3 v-if="selected == 'All'" style="margin: 0;">In all <span style="color: #33a242">[[roundChoices.length]]</span> rounds</h3>
+                  <h3 v-else style="margin: 0;">In round <span style="color: #33a242">[[parseInt(selected)+1]]</span></h3>
+                </div>
+              </div>
+            </stats-card>
+
+            <!-- LABEL STATISTICS -->
+            {% if project_type != "Keyphrase Extraction" %}
+              <stats-card id="label-sg" title="Label frequency" style="flex-grow: 1; max-width: 100%; min-width: 30%;" >
+                <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 60px 30px 60px; width: 100%;">
+                    <horizontal-bar-chart style="width: 100%; max-width: 800px;" :chart-data="labelData"></horizontal-bar-chart>
+                </div>
+              </stats-card>
+
+              <stats-card v-if="glLabelData" id="gl-label-sg" title="Guided learning label frequency" style="flex-grow: 1; max-width: 100%; min-width: 30%;" >
+                <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 60px 30px 60px; width: 100%;">
+                    <horizontal-bar-chart style="width: 100%; max-width: 800px;" :chart-data="glLabelData"></horizontal-bar-chart>
+                </div>
+              </stats-card>
+            {% endif %}
+
+            <!-- IAA -->
+            {% if project_type == "Classification" %}
+              {% if project_multilabel %}
+                <stats-card id="iaa-sg" v-if="iaa" title="Inter-Annotator Agreement (Krippendorff's Alpha + MASI)" style="width: 100%;">
+              {% else %}
+                <stats-card id="iaa-sg" v-if="iaa" title="Inter-Annotator Agreement (Kohen's Kappa)" style="width: 100%;">
+              {% endif %}
+                <div style="display: flex; flex-direction: column; width: 100%; align-items: center; justify-content: space-around">
+                  <div style="display: flex; flex-direction: row; column-gap: 40px; padding: 40px; align-items: center; width: 100%">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; width: 50%;">
+                      <h4 style="margin: 0; margin-bottom: 1em;">Pairwise agreement</h4>
+                      <apexchart type="heatmap" :options="heatMapOptions" :series="iaa.pairwise"></apexchart>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; width: 50%;">
+                      <h4 style="margin: 0; margin-bottom: 1em;">Average agreement per user</h4>
+                      <apexchart type="bar" :options="barChartOptions" :series="iaa.avg"></apexchart>
+                    </div>
+                  </div>
+                  {% if project_multilabel %}
+                    <h4 style="margin-top: 0; ">Joint Krippendorff's alpha + MASI distance = [[ iaa.joint ]] </h4>
+                  {% else %}
+                    <h4 style="margin-top: 0; ">Fleiss' kappa coefficient = [[ iaa.joint ]] </h4>
+                  {% endif %}
+                </div>
+              </stats-card>
+
+              <stats-card id="iaa-trend" v-if="iaaTrend" title="Inter-Annotator Agreement Trend Across Rounds" style="width: 100%;">
+                {% if project_multilabel %}
+                <iaa-trend-multilabel style="width: 80%; margin: auto;" :chart-data="iaaTrend"></iaa-trend-multilabel>
+                {% else %}
+                <iaa-trend style="width: 80%; margin: auto;" :chart-data="iaaTrend"></iaa-trend>
+                {% endif %}
+              </stats-card>
+            {% endif %}
+
+          </div>
+
+        </div>
+
+      </section>
+    </section>
+
+  {% endif %}
+
+  <div class="go-top">
+    <a class="smoothscroll" title="Back to Top" href="#top"><i class="icon-arrow-up" aria-hidden="true"></i></a>
+  </div>
+
+</span>
+
+{% endblock %}
+{% block footer %}
+<script src="{% static 'bundle/stats.js' %}"></script>
+{% if task_id %}
+<script>
+var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+
+function customResult(resultElement, result) {
+  location.reload();
+}
+
+$(function () {
+    CeleryProgressBar.initProgressBar(progressUrl, {
+      onResult: customResult,
+    })
+});
+
+</script>
+{% endif %}
+{% endblock %}

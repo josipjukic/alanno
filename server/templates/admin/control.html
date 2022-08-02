@@ -1,0 +1,232 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+
+{% block content-area %}
+
+
+
+
+<span id="control">
+  <section id="top" class="s-admin target-section" data-parallax="scroll"
+    data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+    data-position-y=center>
+
+    <div class="overlay"></div>
+    <div class="shadow-overlay"></div>
+
+    <div class="admin-content">
+      <div class="row admin-content__main">
+        <h3>{{ project_name }}</h3>
+        <h1>Distribution Control</h1>
+      </div> <!-- end admin-content -->
+
+      <ul class="admin-social">
+        {% if user.is_authenticated %}
+          <li>
+            <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+          </li>
+          <li>
+            <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+          </li>
+          <li>
+            <a href="/instructions#4"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+          </li>
+        {% endif %}
+      </ul> <!-- end admin-social -->
+
+    </div>
+  </section> <!-- end s-admin -->
+
+    <div v-if="messages.length > 0">
+      <div v-bind:class="'alert-box alert-box--' + messageType + ' hideit'">
+        <span v-for="message in messages" v-html="message"></span>
+        <i class="fa fa-times alert-box__close" aria-hidden="true" @click="resetMessages()"></i>
+      </div>
+    </div>
+
+    {% if success %}
+    <div class="alert-box alert-box--success hideit">
+      {{ success }}
+      <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert-box alert-box--error hideit">
+      {{ error }}
+      <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+    </div>
+    {% endif %}
+
+  {% if task_id %}
+  <div class='progress-wrapper'>
+    <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+  </div>
+  <div id="progress-bar-message"></div>
+  <div id="celery-result"></div>
+  {% endif %}
+
+  <section id="settings" class="s-general">
+
+    <div class="row">
+
+      <div class="col-six tab-full">
+        <h3>Batch Settings</h3>
+        <br>
+        <div>
+          <label class="typo__label">Selected annotators</label>
+          <multiselect v-model="selectedAnnotators" :options="options" :multiple="true" :close-on-select="false"
+            group-values="annotators" group-label="group" :group-select="true" placeholder="Type to search"
+            track-by="username" label="username" :block-keys="['Delete']">
+            <span slot="noResult">No such annotator. Consider changing the search query.</span>
+          </multiselect>
+        </div>
+        <br>
+        <div>
+          <label for="batch_size">Batch size</label>
+          <slider id="batch_size" v-model="batch_size" v-bind="bsOptions"></slider>
+        </div>
+        <br>
+        <br>
+        <div>
+          <label for="anno_per_dp">Annotators per document</label>
+          <slider id="anno_per_dp" v-model="anno_per_dp" v-bind="apdOptions"></slider>
+        </div>
+        <br>
+        <br>
+        {% if al_mode %}
+        <div>
+          <label for="model_anno_threshold">Model annotation threshold</label>
+          <slider id="model_anno_threshold" v-model="model_anno_threshold" v-bind="maOptions"></slider>
+        </div>
+        <br>
+        <br>
+        <div>
+          <label for="random_train_proportion">Random train data proportion</label>
+          <slider id="random_train_proportion" v-model="random_train_proportion" v-bind="tpOptions"></slider>
+        </div>
+        <br>
+        <br>
+        <div>
+          <label for="test_proportion">Test data proportion</label>
+          <slider id="test_proportion" v-model="test_proportion" v-bind="tpOptions"></slider>
+        </div>
+        <br>
+        <br>
+        <br>
+        <div>
+          <label class="switch">
+            <input v-model="use_warm_start" type="checkbox" id="use_warm_start">
+            <div>
+              <span>Warm start labels</span>
+            </div>
+          </label>
+        </div>
+        <br>
+        {% endif %}
+
+        <div>
+          <label for="method">Distribution method</label>
+          <select v-model="method" id="method" class="full-width">
+            <option>Round Robin</option>
+            <option>Quasi-Monte Carlo</option>
+            <option>Weighted Distribution</option>
+          </select>
+        </div>
+
+        <br>
+
+        <div v-if="is_weighted">
+          <label for="weighted">Annotation weights</label>
+          <template id="weighted" v-for="(weight,anno) in weights">
+            <label>[[ anno ]]:</label>
+            <slider  v-model="weights[anno]" v-bind="weightsOptions">
+            </slider>
+            <br>
+          </template>
+        </div>
+
+        <br v-if="is_weighted">
+
+        <div>
+          <a href="#control" class="smoothscroll btn btn--primary full-width" v-on:click="generateBatch()">
+            Generate batch
+          </a>
+        </div>
+
+
+      </div>
+
+
+
+      <div class="col-six tab-full">
+
+        <ul class="stats-tabs">
+          <li>
+            <a href="#">
+              <vue-ellipse-progress :progress="getDistributionProgress()" color="#7579ff" empty-color="#324c7e"
+                :size="200" :thickness="8" :empty-thickness="3" :legend-value="distributed" font-size="2rem" dash="2">
+                <span slot="legend-value"> / [[ total ]]</span>
+                <span slot="legend-caption">Distributed</span>
+              </vue-ellipse-progress>
+            </a>
+          </li>
+        </ul>
+
+        <p v-if="hasRound">
+          Last successfully generated round is round #[[roundNumber]], <br>
+          which was generated on [[roundDate]] <br>
+          and contains [[roundDocuments]] documents.
+        </p>
+
+        <h3>Annotator progress</h3>
+        <ul class="stats-tabs">
+          <li v-for="anno in annotators">
+            <a href="#">
+
+              <vue-ellipse-progress :progress="getProgress(anno.id)" color="#7579ff" empty-color="#324c7e" :size="100"
+                :thickness="6" :empty-thickness="2" :legend-value="getCompleted(anno.id)" font-size="1.8rem" dash="4">
+                <span slot="legend-value"> / [[ getTotal(anno.id) ]]</span>
+              </vue-ellipse-progress>
+
+
+              <em style="text-align: center;">[[anno.username]]</em>
+            </a>
+          </li>
+        </ul>
+
+      </div>
+
+    </div> <!-- end row -->
+
+  </section>
+
+  <div class="go-top">
+    <a class="smoothscroll" title="Back to Top" href="#top"><i class="icon-arrow-up" aria-hidden="true"></i></a>
+  </div>
+
+</span>
+
+
+{% endblock %}
+{% block footer %}
+<script src="https://unpkg.com/marked@0.3.6"></script>
+<script src="https://unpkg.com/lodash@4.16.0"></script>
+<script src="{% static 'bundle/control.js' %}"></script>
+{% if task_id %}
+<script>
+  var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+
+  function customResult(resultElement, result) {
+    location.reload();
+  }
+
+  $(function () {
+    CeleryProgressBar.initProgressBar(progressUrl, {
+      onResult: customResult,
+    })
+  });
+
+</script>
+{% endif %}
+{% endblock %}

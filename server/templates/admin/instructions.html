@@ -1,0 +1,29 @@
+{% extends "general/base.html" %}
+{% load static %}
+{% block content %}
+
+<span id="instructions">
+  <section id="top" class="s-admin target-section" data-parallax="scroll" style="max-height: 400px"
+    data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+    data-position-y=center>
+
+    <div class="overlay"></div>
+    <div class="shadow-overlay"></div>
+
+    <div class="admin-content">
+      <div class="row admin-content__main">
+        <h1>Alanno Guide</h1>
+      </div>
+    </div> <!-- end admin-content -->
+
+  </section> <!-- end s-admin -->
+
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: start; margin: 0; padding: 0">
+    <instr-block v-for="(step, index) in instructionSteps" v-bind:step="step" v-bind:index="index" :key="index" v-bind:id="index"></instr-block>
+  </div>
+</span>
+
+{% endblock %}
+{% block footer %}
+<script src="{% static 'bundle/instructions.js' %}"></script>
+{% endblock %}

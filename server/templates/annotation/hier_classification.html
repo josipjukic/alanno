@@ -1,0 +1,38 @@
+{% extends "annotation/annotation_base.html" %}
+{% load static %}
+
+{% block annotation-area %}
+
+<span>
+  <vue2-org-tree :data="treeData" :horizontal="horizontal" :collapsable="collapsable" :render-content="renderContent"
+    :label-class-name="labelClassName" @on-expand="onExpand" @on-node-click="onNodeClick"
+    selected-class-name="selected-node" selected-key="selected" />
+</span>
+
+
+<div class="card-content">
+  <span class="field is-grouped is-grouped-multiline">
+    <span v-if="docs[doc_index] && docs[doc_index].annotations">
+      <span class="control" v-for="(annotation, index) in docs[doc_index].annotations">
+        <span v-if="id2label[annotation.label]">
+          <span class="tag"
+            v-bind:style="{ color: id2label[annotation.label].text_color, 'background-color': id2label[annotation.label].background_color }">
+            [[ id2label[annotation.label].text ]]
+            <span class="closebtn" v-on:click="removeLabel(annotation)">&times;</span>
+          </span>
+          &nbsp;
+        </span>
+      </span>
+    </span>
+  </span>
+  <hr style="margin: 0.8rem 0;">
+  <div class="content_scrollable" v-if="docs[doc_index]">
+    <span class="text" v-html="docs[doc_index].text"></span>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+<script src="{% static 'bundle/hier_classification.js' %}"></script>
+{% endblock %}

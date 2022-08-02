@@ -1,0 +1,112 @@
+{% extends "general/base.html" %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+
+<section id="sign" class="s-sign">
+
+    <div class="overlay"></div>
+    <div class="shadow-overlay"></div>
+
+    <div class="row section-header">
+        <div class="col-full">
+            <h1 class="subhead">Ready for Active Learning?</h1>
+        </div>
+    </div>
+
+
+    <div class="row sign-content" data-aos="fade-up">
+
+        <div class="sign-primary">
+
+            <h3 class="h6">Registration form</h3>
+
+            {% if form.non_field_errors %}
+            <div class="alert-box alert-box--error hideit">
+                {% for error in form.non_field_errors %}
+                {{ error }}
+                {% endfor %}
+                <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+            </div>
+            {% endif %}
+
+
+            <form method="post" onsubmit="loadingAnimation();">
+                {% csrf_token %}
+                {% for field in form.visible_fields %}
+                <div class="form-field">
+                    {% if field.errors %}
+                    <div class="alert-box alert-box--error hideit">
+                        {{ field.errors }}
+                        <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+                    </div>
+                    {% endif %}
+                    <label class="label">{{ field.label_tag }}</label>
+                    {% render_field field class="input full-width" %}
+                </div>
+                {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% endfor %}
+
+                <button class="full-width btn--primary">Register</button>
+
+                <div class="border-top pt-3">
+                    <small class="text-muted">
+                        Already have an account? <a href="{% url 'login' %}">Log in</a>
+                    </small>
+                </div>
+            </form>
+
+
+            <!-- sign-warning -->
+            <div class="message-warning">
+                Something went wrong. Please try again.
+            </div>
+
+            <!-- sign-success -->
+            <div class="message-success">
+                Your message was sent, thank you!<br>
+            </div>
+
+        </div> <!-- end sign-primary -->
+
+        <div class="sign-secondary">
+            <div class="sign-info">
+
+                <h3 class="h6 hide-on-fullwidth" style="margin-bottom: 60px;">Contact Info</h3>
+
+                <div class="cinfo" style="margin-bottom: 45px;">
+                    <h5 style="margin-bottom: 10px;">Where to Find Us</h5>
+                    <p>
+                        TakeLab<br>
+                        Faculty of Electrical Engineering and Computing<br>
+                        University of Zagreb
+                    </p>
+                </div>
+
+                <div class="cinfo">
+                    <h5 style="margin-bottom: 10px;">Email Us At</h5>
+                    <p>
+                        josip.jukic@fer.hr
+                    </p>
+                </div>
+
+            </div> <!-- end sign-info -->
+        </div> <!-- end sign-secondary -->
+
+    </div> <!-- end sign-content -->
+
+    <ul class="home-social">
+        <li>
+            <a href="{% url 'login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i><span>Login</span></a>
+        </li>
+    </ul>
+    <!-- end home-social -->
+
+
+
+
+</section> <!-- end s-contact -->
+
+{% endblock %}

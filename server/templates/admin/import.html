@@ -1,0 +1,126 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block content-area %}
+
+<section id="top" class="s-admin target-section" data-parallax="scroll"
+  data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+  data-position-y=center>
+
+  <div class="overlay"></div>
+  <div class="shadow-overlay"></div>
+
+  <div class="admin-content">
+
+    <div class="row admin-content__main">
+      <h3>{{ project_name }}</h3>
+      <h1>Import Data</h1>
+    </div> <!-- end admin-content -->
+
+    <ul class="admin-social">
+      {% if user.is_authenticated %}
+        <li>
+          <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+        </li>
+        <li>
+          <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+        </li>
+        <li>
+          <a href="/instructions#3"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+        </li>
+      {% endif %}
+    </ul> <!-- end admin-social -->
+  </div>
+
+</section> <!-- end s-admin -->
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert-box alert-box--{{ message.tags }} hideit">
+  {{ message }}
+  <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+</div>
+{% endfor %}
+{% endif %}
+
+<div class='progress-wrapper'>
+  <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+</div>
+<div id="progress-bar-message"></div>
+<div id="celery-result"></div>
+
+<section class="s-general">
+  <div class="row half-bottom">
+    <div class="col-six tab-full">
+
+      <h3>Import data from a CSV file</h3>
+
+      <dl>
+        <dd>Each line should contain comma separated values. <b>Header <code>text</code> must be included.</b>
+        </dd>
+
+        {% if project_type == "Classification" %}
+        <dd>
+          If you want to upload partially labeled data, make sure to add <code>label</code> and <code>annotator</code>
+          headers, whose values can be blank for some or all rows.
+        </dd>
+        <dd> Only label names that are already defined in this project will be recognized as correct annotations.
+          Others will be ignored and regarded as unlabeled text.</dd>
+        <dd> Include <code>document_id</code> in the header if you want to have more than one label per document.</dd>
+        {% endif %}
+      </dl>
+
+    </div>
+
+    <div class="col-six tab-full">
+
+      <br><br>
+
+      <form action="{% url 'upload_file' project_id %}" method="post" enctype="multipart/form-data"
+        onsubmit="loadingAnimation();">
+        {% csrf_token %}
+        <div class="section">
+          <div class="control">
+            <div class="file has-name is-small mb20">
+              <label class="file-label">
+                <input type="file" ref="file" name="file" required v-on:change="handleFileUpload()">
+              </label>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button type="submit" class="btn--primary">Upload</button>
+          </div>
+        </div>
+      </form>
+
+    </div> <!-- end row -->
+
+</section>
+
+
+{% endblock %}
+
+{% block footer %}
+<script src="{% static 'bundle/upload.js' %}"></script>
+{% if task_id %}
+<script>
+  var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+
+  function customResult(resultElement, result) {
+    $(resultElement).append(
+      $('<p>').text(result)
+    );
+  }
+
+  $(function () {
+    CeleryProgressBar.initProgressBar(progressUrl, {
+      onResult: customResult,
+    })
+  });
+
+</script>
+{% endif %}
+{% endblock %}

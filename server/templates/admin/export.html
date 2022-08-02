@@ -1,0 +1,126 @@
+{% extends "admin/admin_base.html" %}
+{% load static %}
+{% block content-area %}
+
+<section id="top" class="s-admin target-section" data-parallax="scroll"
+  data-image-src="{% static 'images/home-bg.jpg' %}" data-natural-width=3000 data-natural-height=2000
+  data-position-y=center>
+
+  <div class="overlay"></div>
+  <div class="shadow-overlay"></div>
+
+  <div class="admin-content">
+    <div class="row admin-content__main">
+      <h3>{{ project_name }}</h3>
+      <h1>Export Data</h1>
+    </div>
+  </div> <!-- end admin-content -->
+
+  <ul class="admin-social">
+    {% if user.is_authenticated %}
+      <li>
+        <a href="/"><i class="fa fa-home" aria-hidden="true"></i><span>Home</span></a>
+      </li>
+      <li>
+        <a href="/projects"><i class="fa fa-book" aria-hidden="true"></i><span>Projects</span></a>
+      </li>
+      <li>
+        <a href="/instructions#7"><i class="fa fa-info" aria-hidden="true"></i><span>Help</span></a>
+      </li>
+    {% endif %}
+  </ul> <!-- end admin-social -->
+
+</section> <!-- end s-admin -->
+
+{% if messages %}
+  {% for message in messages %}
+          <div class="alert-box alert-box--{{ message.tags }} hideit">
+          {{ message }}
+          <i class="fa fa-times alert-box__close" aria-hidden="true"></i>
+          </div>
+  {% endfor %}
+{% endif %}
+
+<div class='progress-wrapper'>
+  <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+</div>
+<div id="progress-bar-message"></div>
+
+<section class="s-general">
+
+  <div class="row half-bottom">
+
+    <div class="col-six tab-full">
+
+      <h3>Information</h3>
+      <p>
+        <b>There are two data formats that you can choose: <code>CSV</code> and <code>JSON</code></b>
+      </p>
+      <p>
+        If you import data in <code>JSON</code> format with line breaks and download it as <code>CSV</code>, the line
+        breaks
+        will render on the result. In that case, we recommend you to download it as a <code>JSON</code> file.
+      </p>
+
+    </div>
+
+    <div class="col-six tab-full">
+
+      <h3>Export</h3>
+
+      <form action="{% url 'download_file' project_id %}" method="get">
+        <div class="section">
+          <div class="inline-field">
+            <input type="radio" id="csv" name="format" value="csv" checked>
+            <label for="csv">CSV</label><br>
+            <input type="radio" id="json" name="format" value="json">
+            <label for="csv">JSON</label><br>
+          </div>
+        {% if project_type == "Classification" %}
+        <div class="inline-field">
+          <input type="checkbox" id="aggregation" name="aggregation" value="aggregation" checked>
+          <label for="aggregation">Get aggregated data</label>
+        </div>
+        {% endif %}
+        <div class="inline-field">
+          <input type="checkbox" id="unlabeled" name="unlabeled" value="unlabeled">
+          <label for="unlabeled">Get unlabeled data</label>
+        </div>
+        <div class="inline-field">
+        <a class="control">
+           <button type="submit" class="btn--primary" name="action" value="create">Create</button>
+        </a>
+        {% if data_ready %}
+        <a class="control">
+           <button type="submit" class="btn--primary" name="action" value="download">Download</button>
+        </a>
+        <small>{{ data.get_message }}</small>
+        {% endif %}
+        </div>
+        </div>
+      </form>
+
+    </div> <!-- end row -->
+
+</section>
+
+{% endblock %}
+
+{% block footer %}
+{% if task_id %}
+<script>
+var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+
+function customResult(resultElement, result) {
+  location.reload();
+}
+
+$(function () {
+    CeleryProgressBar.initProgressBar(progressUrl, {
+      onResult: customResult,
+    })
+});
+
+</script>
+{% endif %}
+{% endblock %}

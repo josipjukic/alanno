@@ -1,0 +1,43 @@
+version: "3.3"
+
+services:
+    backend:
+        build:
+            dockerfile: deployment/django.prod.dockerfile
+            context: .
+        environment:
+            DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+            DJANGO_DEBUG: "False"
+            ALANNO_DB_NAME: ${ALANNO_DB_NAME}
+            ALANNO_DB_USER: ${ALANNO_DB_USER}
+            ALANNO_DB_HOST: ${ALANNO_DB_HOST}
+            ALANNO_DB_PASSWORD: ${ALANNO_DB_PASSWORD}
+            DJANGO_ADMIN_USERNAME: ${DJANGO_ADMIN_USERNAME}
+            DJANGO_ADMIN_EMAIL: ${DJANGO_ADMIN_EMAIL}
+            DJANGO_ADMIN_PASSWORD: ${DJANGO_ADMIN_PASSWORD}
+        depends_on:
+            - database
+        volumes:
+            - django_static:/var/www/alanno/static/
+
+    nginx:
+        build:
+            dockerfile: deployment/nginx.prod.dockerfile
+            context: .
+        volumes:
+            - django_static:/var/www/alanno/static/
+        ports:
+            - 8025:80
+
+    database:
+        image: postgres:12
+        environment:
+            POSTGRES_DB: ${ALANNO_DB_NAME}
+            POSTGRES_USER: ${ALANNO_DB_USER}
+            POSTGRES_PASSWORD: ${ALANNO_DB_PASSWORD}
+        volumes:
+            - postgres_persistence:/var/lib/postgresql/data
+
+volumes:
+    django_static:
+    postgres_persistence:

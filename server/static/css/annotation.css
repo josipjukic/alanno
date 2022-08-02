@@ -1,0 +1,476 @@
+html,
+body {
+  /*font-family: arial, 'Open Sans', serif;*/
+  /*line-height: 1.5;
+  height: 100%;*/
+  background-color: #f3f3f3;
+}
+
+.custom-tag {
+  border-radius: 5%;
+  padding: 0.015em;
+  margin-top: 0.025em;
+  margin-bottom: 0.025em;
+}
+
+.aside {
+  display: block;
+  background-color: #2a2e2f;
+  border-right: 1px solid #DEDEDE;
+}
+
+.messages {
+  display: block;
+  background-color: #fff;
+  border-right: 1px solid #DEDEDE;
+}
+
+.message {
+  display: block;
+  background-color: #f3f3f3;
+}
+
+.aside .main {
+  padding: 20px 40px;
+  color: #6F7B7E;
+}
+
+.aside .title {
+  color: #6F7B7E;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.aside .main .item {
+  display: flex;
+  /*padding: 10px 0;*/
+  padding: 10px 20px 10px 40px;
+  margin: 0 -50px;
+  color: #6F7B7E;
+}
+
+.aside .main .item.active {
+  background-color: #5a5e5f;
+  margin: 0 -50px;
+  /*padding-left: 50px;*/
+  padding-left: 40px;
+}
+
+.aside .main .item:active,
+.aside .main .item:hover {
+  background-color: #5a5e5f;
+  margin: 0 -50px;
+  /*padding-left: 50px;*/
+  padding-left: 40px;
+}
+
+.aside .main .icon {
+  font-size: 19px;
+  padding-right: 30px;
+  color: #f3f3f3;
+}
+
+.aside .main .name {
+  font-size: 15px;
+  color: #f3f3f3;
+  font-weight: 500;
+}
+
+.messages {
+  padding: 40px 20px;
+}
+
+.message {
+  padding: 40px 20px;
+}
+
+.pg {
+  display: inline-block;
+  top: 10px;
+}
+
+.is-grouped .button {
+  background-image: linear-gradient(#F8F8F8, #F1F1F1);
+}
+
+.is-grouped .button .fa {
+  font-size: 15px;
+  color: #AAAAAA;
+}
+
+.inbox-messages {
+  margin-top: 60px;
+}
+
+.message-preview {
+  margin-top: 60px;
+}
+
+.inbox-messages .card {
+  width: 100%;
+}
+
+.inbox-messages strong {
+  color: #5D5D5D;
+}
+
+.inbox-messages .msg-check {
+  padding: 0 20px;
+}
+
+.inbox-messages .msg-subject {
+  padding: 10px 0;
+  color: #5D5D5D;
+}
+
+.inbox-messages .msg-attachment {
+  float: right;
+}
+
+.inbox-messages .msg-snippet {
+  padding: 5px 20px 0px 5px;
+}
+
+.inbox-messages .msg-subject .fa {
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.card.active {
+  background-color: #F5F5F5;
+}
+
+.phrases {
+  font-size: 14pt;
+  line-height: 150%;
+  margin: 0.5em;
+}
+
+
+.content {
+  font-size: 12pt;
+  line-height: 150%;
+}
+
+.content_scrollable{
+    font-size: 12pt;
+    line-height: 150%;
+    overflow-y: scroll;
+    max-height: 70vh;
+    padding-left: .5em;
+    padding-right: .5em;
+}
+
+.content .tag {
+  font-size: 16pt;
+  height: 1.5em;
+  padding-left: .5em;
+  padding-right: .5em;
+}
+
+.content .phrase {
+  font-size: 16pt;
+  height: 1.5em;
+  padding-left: .5em;
+  padding-right: .5em;
+  background-color: white;
+}
+
+
+.content .text {
+  white-space: pre-wrap; /* Rendering newlines for classification and seq2seq tasks */
+}
+
+.content .post {
+  white-space: pre-wrap;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 15pt;
+  padding: 0.25em;
+  padding-left: .5em;
+  margin-bottom: 1em;
+  border-radius: 30px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.content .comment {
+  white-space: pre-wrap;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 14pt;
+  margin-left: 1.5em;
+  padding: 0.25em;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+  border-radius: 30px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.content .reply {
+  white-space: pre-wrap;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 12pt;
+  margin-left: 1.5em;
+  margin-left: 3.5em;
+  padding: 0.25em;
+  padding-left: 0.5em;
+  margin-bottom: 0.3em;
+  border-radius: 30px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.focused {
+  color: rgba(0, 0, 0);
+}
+
+.content .text-sequence {
+  white-space: normal; /* Not render newlines for sequence labelling */
+  height: auto;
+}
+
+:focus {
+  outline: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.todoapp {
+  background: #fff;
+  margin: 30px 0 0 0;
+  position: relative;
+  box-shadow: 0 2px 3px rgba(10, 10, 10, .1), 0 0 0 1px rgba(10, 10, 10, .1)
+}
+
+.todoapp input::-webkit-input-placeholder {
+  font-style: italic;
+  font-weight: 300;
+  color: #e6e6e6;
+}
+
+.todoapp input::-moz-placeholder {
+  font-style: italic;
+  font-weight: 300;
+  color: #e6e6e6;
+}
+
+.todoapp input::input-placeholder {
+  font-style: italic;
+  font-weight: 300;
+  color: #e6e6e6;
+}
+
+.new-todo,
+.edit {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  font-size: 16pt;
+  font-family: inherit;
+  font-weight: inherit;
+  line-height: 1.4em;
+  border: 0;
+  color: inherit;
+  padding: 6px;
+  border: 1px solid #999;
+  box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.new-todo {
+  padding: 1.5rem;
+  border: none;
+  background: rgba(0, 0, 0, 0.003);
+  box-shadow: inset 0 -2px 1px rgba(0, 0, 0, 0.03);
+}
+
+.todo-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-list li {
+  position: relative;
+  font-size: 16pt;
+  border-bottom: 1px solid #ededed;
+}
+
+.todo-list li:last-child {
+  border-bottom: none;
+}
+
+.todo-list li.editing {
+  border-bottom: none;
+  padding: 0;
+}
+
+.todo-list li.editing .edit {
+  display: block;
+  padding: 12px 16px;
+}
+
+.todo-list li.editing .view {
+  display: none;
+}
+
+.todo-list li label {
+  word-break: break-all;
+  padding: 1.5rem 60px 1.5rem 1.5rem;
+  display: block;
+  line-height: 1.2;
+  transition: color 0.4s;
+}
+
+.todo-list li .destroy {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 10px;
+  bottom: 0;
+  margin: auto 0;
+}
+
+.todo-list li:hover .destroy {
+  display: block;
+}
+
+.todo-list li .edit {
+  display: none;
+}
+
+.todo-list li.editing:last-child {
+  margin-bottom: -1px;
+}
+
+/* .modal-card-body-footer {
+  border-bottom: 1px solid #dbdbdb;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+} */
+
+.is-vertical-center {
+  align-items: center;
+}
+
+.page-button {
+  color: white;
+  background-color: gray;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.style-chooser .vs__search::placeholder,
+.style-chooser .vs__dropdown-toggle,
+.style-chooser .vs__dropdown-menu {
+  background: #dfe5fb;
+  border: none;
+  color: #394066;
+  text-transform: lowercase;
+  font-variant: small-caps;
+}
+
+.style-chooser .vs__clear,
+.style-chooser .vs__open-indicator {
+  fill: #394066;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  border: 2px dotted rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+}
+
+.label-text {
+  margin-left: 8px;
+}
+
+.toggle {
+  isolation: isolate;
+  position: relative;
+  height: 24px;
+  width: 48px;
+  border-radius: 15px;
+  background: #d6d6d6;
+  overflow: hidden;
+}
+
+.toggle-inner {
+  z-index: 2;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  height: 22px;
+  width: 46px;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.active-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 200%;
+  background: hsl(171, 100%, 41%);
+  transform: translate3d(-100%, 0, 0);
+  transition: transform 0.05s linear 0.17s;
+}
+
+.toggle-state {
+  display: none;
+}
+
+.indicator {
+  height: 100%;
+  width: 200%;
+  background: white;
+  border-radius: 13px;
+  transform: translate3d(-75%, 0, 0);
+  transition: transform 0.35s cubic-bezier(0.85, 0.05, 0.18, 1.35);
+}
+
+.toggle-state:checked ~ .active-bg {
+   transform: translate3d(-50%, 0, 0);
+}
+
+.toggle-state:checked ~ .toggle-inner .indicator {
+   transform: translate3d(25%, 0, 0);
+}
+
+kbd {
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.1em 0.5em;
+  margin: 0 0.2em;
+  box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #fff inset;
+  background-color: #f7f7f7;
+}
+
+#shortcut-keys {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#shortcut-keys td, #shortcut-keys th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#shortcut-keys tr:nth-child(even){background-color: #f2f2f2;}
+
+#shortcut-keys th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+[v-cloak] { display: none; }

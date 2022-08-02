@@ -1,0 +1,120 @@
+{% load static %}
+
+<!DOCTYPE html>
+<!--[if lt IE 9 ]><html class="no-js oldie" lang="en"> <![endif]-->
+<!--[if IE 9 ]><html class="no-js oldie ie9" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+
+  <!--- basic page needs
+    ================================================== -->
+  <meta charset="utf-8">
+  <title>Alanno</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- mobile specific metas
+    ================================================== -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS
+    ================================================== -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/vue-multiselect.min.css' %}">
+
+  <!-- script
+    ================================================== -->
+  <script src="{% static 'js/utils/modernizr.js' %}"></script>
+  <script src="{% static 'js/utils/pace.min.js' %}"></script>
+  <script src="{% static 'js/utils/jquery.min.js' %}"></script>
+
+  <!-- favicons
+    ================================================== -->
+  <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+</head>
+
+<header class="s-header">
+
+  <div class="row">
+    <div class="header-logo">
+      <a class="site-logo" href="{% url 'home' %}">
+        <img src="{% static 'images/logo.svg' %}" alt="Homepage" style="width: 30%; height: auto;">
+      </a>
+    </div>
+    <!-- <div class="header-logo-secondary">
+      <a class="site-logo" href="https://takelab.fer.hr/" alt="TakeLab">
+        <img src="{% static 'images/favicon.ico' %}" style="width: 25px; height: 25px;">
+      </a>
+    </div> -->
+  </div>
+
+  <nav class="header-nav">
+
+    <a href="#0" class="header-nav__close" title="close"><span>Close</span></a>
+
+    <div class="header-nav__content">
+      {% if user.is_authenticated %}
+      <h3>{{ user }}</h3>
+      {% else %}
+      <h3>Alanno</h3>
+      {% endif %}
+
+      <ul class="header-nav__list">
+        <a href="{% url 'home' %}" title="home">
+          <li class="current">Home</li>
+        </a>
+        {% if user.is_authenticated %}
+        <br>
+        <a href="{% url 'projects' %}" title="projects">
+          <li><i class="fa fa-book" aria-hidden="true"></i> Projects</li>
+        </a>
+        <a href="{% url 'instructions' %}" title="projects">
+          <li><i class="fa fa-info-circle" aria-hidden="true"></i> Alanno Guide</li>
+        </a>
+        {% else %}
+        <br>
+        <a href="{% url 'login' %}">
+          <li><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</li>
+        </a>
+        <a href="{% url 'register' %}">
+          <li><i class="fa fa-user-plus" aria-hidden="true"></i> Register</li>
+        </a>
+        {% endif %}
+      </ul>
+
+      <p>Perspiciatis hic praesentium nesciunt. Et neque a dolorum <a href='#0'>voluptatem</a> porro iusto sequi
+        veritatis libero enim. Iusto id suscipit veritatis neque reprehenderit.</p>
+
+      {% if user.is_authenticated %}
+      <ul class="header-nav__list">
+        <a href="{% url 'logout' %}">
+          <li>Log out <i class="fa fa-sign-out" aria-hidden="true"></i></li>
+        </a>
+      </ul>
+      {% endif %}
+
+    </div> <!-- end header-nav__content -->
+
+  </nav> <!-- end header-nav -->
+
+  <a class="header-menu-toggle" href="#0">
+    <span class="header-menu-text">Menu</span>
+    <span class="header-menu-icon"></span>
+  </a>
+</header>
+
+{% block content %}{% endblock %}
+{% block footer %}{% endblock %}
+
+<script src="{% static 'js/plugins.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+</body>
+
+</html>

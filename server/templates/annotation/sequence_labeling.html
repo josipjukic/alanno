@@ -1,0 +1,51 @@
+{% extends "annotation/annotation_base.html" %}
+{% load static %}
+
+{% block annotation-area %}
+<div class="card"
+     style="height: 80vh; margin-left: 40px; margin-right: 160px; border-radius: 0;"
+     v-bind:style="[docs[doc_index].completed_by_user ? {'border-color': '#39b54a', 'color': 'lightgray', 'border-width': '0.5rem'} : {}]">
+
+  <!-- DOCUMENT NUMBER -->
+  <header class="card-header">
+    <div class=" card-header-title" style="padding:0.5rem; font-size: x-large;">
+      <b>&#91; [[ start_index + doc_index + 1 ]] &#93;</b>
+    </div>
+  </header>
+
+  <!-- DOCUMENT CONTENT -->
+  <div id="doc_content" v-if="docs[doc_index]" class="card-content" style="padding: 1em; overflow-y: auto; height: 100vh; font-size: large;">
+    <div style="display: inline-block; margin: 10px 0 10px 0; padding: 0;"
+                v-for="tok in tokens"
+                v-bind:style="getStyleForToken(tok)"
+                v-on:mousedown="onTokenMouseDown(tok)"
+                v-on:mouseup="onTokenMouseUp(tok)">[[tok.word]]</div>
+  </div>
+
+  <!-- LIST OF LABELS (POSSIBLE ANNOTATIONS) -->
+  <div class="card-footer pb-4 pt-1">
+    <div class="flex-row align-items-center justify-content-center flex-wrap pt-0 pb-0">
+        <button v-for="(label, item) in labels"
+                class="mt-3 ml-2 mr-2 mb-0 btn-outline-primary"
+                v-on:click="setActiveLabel(label)" v-shortkey.once="[ label.shortcut ]" @shortkey="addLabel(label)"
+                style="padding: 10px; display: flex; align-items: center; height: 3.75rem;"
+                v-bind:style="labelStyle(label)"
+        >
+          [[ label.text ]]
+        </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<script src="https://unpkg.com/marked@0.3.6"></script>
+<script src="https://unpkg.com/lodash@4.16.0"></script>
+<script src="{% static 'bundle/sequence_labeling.js' %}"></script>
+<script>
+  function loadingAnimation() {
+    var load = document.getElementById("loader");
+    load.style.visibility = 'visible';
+  }
+</script>
+{% endblock %}
