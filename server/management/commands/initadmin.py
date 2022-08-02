@@ -9,8 +9,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if User.objects.count() == 0:
             username = os.environ.get("DJANGO_ADMIN_USERNAME") or "admin"
-            email = os.environ.get("DJANGO_ADMIN_EMAIL") or "admin@gmail.com"
-            password = os.environ.get("DJANGO_ADMIN_PASSWORD") or "morskipassword"
+            email = os.environ.get("DJANGO_ADMIN_EMAIL") or "admin@mail.com"
+            password = os.environ.get("DJANGO_ADMIN_PASSWORD") or "password"
             print(f"Creating account for {username} {email}")
             admin = User.objects.create_superuser(
                 email=email, username=username, password=password

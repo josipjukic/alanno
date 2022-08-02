@@ -16,7 +16,7 @@
   \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"../node_modules/vue/dist/vue.esm.js\");\n\r\n\r\n\r\nconst vm = new vue__WEBPACK_IMPORTED_MODULE_0__[\"default\"]({\r\n  el: '#main',\r\n  delimiters: ['[[', ']]'],\r\n  data: {\r\n    file: '',\r\n  },\r\n\r\n  methods: {\r\n    handleFileUpload() {\r\n      console.log(this.$refs.file.files);\r\n      this.file = this.$refs.file.files[0].name;\r\n    },\r\n  },\r\n});\r\n\r\n\n\n//# sourceURL=webpack://server/./static/js/admin/upload.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ \"../node_modules/vue/dist/vue.esm.js\");\n\n\n\nconst vm = new vue__WEBPACK_IMPORTED_MODULE_0__[\"default\"]({\n  el: '#main',\n  delimiters: ['[[', ']]'],\n  data: {\n    file: '',\n  },\n\n  methods: {\n    handleFileUpload() {\n      console.log(this.$refs.file.files);\n      this.file = this.$refs.file.files[0].name;\n    },\n  },\n});\n\n\n\n//# sourceURL=webpack://server/./static/js/admin/upload.js?");
 
 /***/ }),
 
