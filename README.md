@@ -12,15 +12,15 @@ A short demonstration video is available at https://www.youtube.com/watch?v=hPcH
 
 The application can be run in two modes:
 
+- Local
 - Production
-- Development
 
 You will need [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/). 
 
 First, you need to clone the repository:
 
 ```bash
-$ git clone https://repos.takelab.fer.hr/jjukic/alanno.git
+$ git clone https://github.com/josipjukic/alanno.git
 $ cd alanno
 ```
 
@@ -49,18 +49,18 @@ As an administrator, you get to create new projects and be their manager. Creati
 
 Scratch below the surface, and into the whole point of this application, by toggling the **Active Learning** switch on the form, which will display a whole new set of settings for your project. Every Active Learning method relies on an AI model to query the dataset in some way. In other words, if you want to use Active Learning, you will need to define the supporting NLP model. These settings are more technical in nature and require you to know a bit about NLP and Active Learning. Don't worry, though: you can change them anytime on the project Settings page.
 
-As a regular user, and by this we mean annotator, your only option is to be invited to join a project by a project's moderator. They will do this by sending you an access code, which you can then safely type into the appropriate form on the bottom of the `projects` page. Once you click **Join**, you are officially a member of the project, and soon enough you will be able to start annotating documents.
+As a regular user, and by this we mean annotator, your only option is to be invited to join a project by a project's moderator. They will do this by sending you an access code, which you can then safely type into the appropriate form on the bottom of the `Projects` page. Once you click **Join**, you are officially a member of the project, and soon enough you will be able to start annotating documents.
 
 
 ## 2. Add members
 
 #### We don't want it to be lonely here
 
-Going back to the [projects page](https://alanno2.takelab.fer.hr/projects), we now see that apart from the forms for creating and joining a project, it also shows all the projects you're a member of. On the surface, clicking on a project just takes you to its Settings page. But actually, you are now in the project's "domain" - everything you do is related to this particular project, until you eventually go back to the projects page, or the homepage. You can verify this by opening the sidebar - it will show several new, project-related options (starting with **Settings**).
+Going back to the `Projects` page, we now see that apart from the forms for creating and joining a project, it also shows all the projects you're a member of. On the surface, clicking on a project just takes you to its `Settings` page. But actually, you are now in the project's "domain" - everything you do is related to this particular project, until you eventually go back to the `Projects` page, or the homepage. You can verify this by opening the sidebar - it will show several new, project-related options (starting with **Settings**).
 
-Let's stay on the Settings page for a while, since we're here. The first, and most important part of this page is the project access code. You need this to invite other people to join your project as annotators. As described in the [Create a project](https://alanno2.takelab.fer.hr/instructions#0) section, send this code to anyone who wishes to join the project. They will have to create an account if they don't have it already, and then paste the access code into the [project joining form](https://alanno2.takelab.fer.hr/projects/#join). After you import a dataset, you will be able to distribute documents for annotation to all the members you added.
+Let's stay on the Settings page for a while, since we're here. The first, and most important part of this page is the project access code. You need this to invite other people to join your project as annotators by sending them the access code. They will have to create an account if they don't have it already, and then paste the access code into the project joining form. After you import a dataset, you will be able to distribute documents for annotation to all the members you added.
 
-Apart from the access code, the Settings page provides all the project information, as well as the ability to help your annotators by adding project guidelines. If you enabled Active Learning for your project, the project information is followed by, as promised, a section where you can change all the related settings. Finally, there is an option to delete the project, in case something goes wrong with it. But please come back!
+Apart from the access code, the `Settings` page provides all the project information, as well as the ability to help your annotators by adding project guidelines. If you enabled Active Learning for your project, the project information is followed by, as promised, a section where you can change all the related settings. Finally, there is an option to delete the project, in case something goes wrong with it. But please come back!
 
 
 ## 3. Define labels
@@ -79,7 +79,7 @@ Label creation itself is fairly straightforward - you can choose the label name,
 In order to annotate documents, we first need to have some documents to annotate. To import a dataset, open the Import page within the project's domain. Some basic instructions are written there as well, but it's certainly worth repeating:  
 
 *   You can only import CSV files
-*   The CSV file must contain a [](https://alanno2.takelab.fer.hr/instructions)header row
+*   The CSV file must contain a header row
 *   Supported headers are: `text`, `document_id`, `label` and `annotator`
 *   Only the `text` column is required
 *   The text may include line breaks `\n` and/or HTML tags, which will be used to properly format the text during annotation
@@ -111,7 +111,7 @@ Regardless of your role on a project, once the project manager has distributed d
 
 On the left side of the page you will see your progress in this round, followed by a list of documents that were distributed to you. You can filter these documents by their completion status, as well as search them for keywords. The bottom of the page contains a lock button sandwiched between navigation buttons. The former is used to submit your annotation, while the latter are used to quickly go from one document to the next (or previous). As long as the round is active (i.e. until the manager creates a new round), you are free to unlock, change and lock the annotations you provided.
 
-The center of this page will always display the document itself, with any formatting that was provided as HTML tags during [dataset import](https://alanno2.takelab.fer.hr/instructions#3). However, the actual manner of annotation depends on the project type and other modifiers. This will always be explained on the annotation page itself, but just in case: classification projects require you to select one (single-label) or more (multi-label) labels shown below the document, while sequence labeling projects require you to select a part of text **and** a label to apply to the selected text.
+The center of this page will always display the document itself, with any formatting that was provided as HTML tags during dataset import. However, the actual manner of annotation depends on the project type and other modifiers. This will always be explained on the annotation page itself, but just in case: classification projects require you to select one (single-label) or more (multi-label) labels shown below the document, while sequence labeling projects require you to select a part of text **and** a label to apply to the selected text.
 
 
 ## 7. Track annotation progress
