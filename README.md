@@ -1,4 +1,4 @@
-# Alanno - active learning annotation tool
+# Alanno - Active Learning Annotation
 <br>
 Annotation tool powered by Active Learning.
 <br>
