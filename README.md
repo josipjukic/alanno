@@ -34,7 +34,7 @@ $ docker-compose -f docker-compose.local.yml up
 $ docker-compose -f docker-compose.prod.yml up
 ```
 
-Note : An example of relevant environmental variables is given in the `.env` file. You should replace the placeholder values.
+Note: An example of relevant environmental variables is given in the `.env` file. You should replace the placeholder values.
 
 Go to <http://localhost:8000/> to access the application.
 
