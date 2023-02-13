@@ -8,7 +8,7 @@ Annotation tool powered by Active Learning.
 A short demonstration video is available at https://www.youtube.com/watch?v=hPcHPM8ttvE.
 <br>
 
-# Usage
+# Installation
 
 The application can be run in two modes:
 
